@@ -69,8 +69,6 @@ function App() {
     setCurrentPage('request');
   };
 
-  const activeTab = analysisTabs.find(tab => tab.id === activeTabId);
-
   return (
     <div className="App">
       {currentPage === 'request' && (

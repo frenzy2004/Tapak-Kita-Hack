@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, ChevronDown } from 'lucide-react';
-import NeuralBackground from '../components/NeuralBackground';
 import { DottedSurface } from '../components/ui/dotted-surface';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot } from 'lucide-react';
 import { ChatMessage } from '../types';
-import { chatSuggestions } from '../data/mockData';
 
 interface AIAssistantProps {
   onClose?: () => void;
@@ -204,13 +203,6 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
     };
     setMessages(prev => [...prev, aiResponse]);
     setIsTyping(false);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
   };
 
   return (

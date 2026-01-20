@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Leaf, TrendingUp, MapPin, Calendar, Droplets, Building, Activity } from 'lucide-react';
+import { Leaf, TrendingUp, MapPin, Calendar, Activity } from 'lucide-react';
 import { unifiedApiService, NDVIAnalysisResponse } from '../services/unifiedApiService';
 
 interface NDVIAnalysisProps {
@@ -52,7 +51,7 @@ const NDVIAnalysis: React.FC<NDVIAnalysisProps> = ({
       const mockData: NDVIAnalysisResponse = {
         success: true,
         location,
-        coordinates: coordinates || { latitude: 0, longitude: 0 },
+        coordinates: coordinates ? { latitude: coordinates.lat, longitude: coordinates.lng } : { latitude: 0, longitude: 0 },
         timeline_start: "2017-04-10",
         timeline_end: "2025-04-28",
         chosen_dates: [

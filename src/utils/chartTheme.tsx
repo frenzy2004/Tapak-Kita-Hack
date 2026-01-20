@@ -1,5 +1,3 @@
-import React from 'react';
-
 // Dark theme configuration for all Chart.js charts
 export const darkChartColors = {
   primary: 'hsl(262, 83%, 58%)',
