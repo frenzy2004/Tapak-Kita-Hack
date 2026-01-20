@@ -18,7 +18,7 @@ import KPICards from '../components/KPICards';
 import RentLocationContent from '../components/RentLocationContent';
 import SatelliteAnalysis from '../components/SatelliteAnalysis';
 import NDVIAnalysis from '../components/NDVIAnalysis';
-import ApiStatusIndicator from '../components/ApiStatusIndicator';
+
 import ApiInstructions from '../components/ApiInstructions';
 import { LocationAnalysis as LocationAnalysisType, Business, AnalysisTab, Location } from '../types';
 import { mockAnalysis } from '../data/mockData';
@@ -353,7 +353,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
 
               {/* Right: Action Buttons */}
               <div className="flex items-center gap-2">
-                <ApiStatusIndicator />
+                
                 <button
                   onClick={onNewComparison}
                   className="btn-icon btn-ghost"
