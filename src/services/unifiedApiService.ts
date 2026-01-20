@@ -274,8 +274,6 @@ export const performChangeDetection = async (
       zoom_level: 'City-Wide (0.025°)',
       resolution: 'Standard (5m)',
       alpha: 0.4,
-      model_type: 'siamese_unet',
-      use_pytorch: true,
       ...options,
     };
 

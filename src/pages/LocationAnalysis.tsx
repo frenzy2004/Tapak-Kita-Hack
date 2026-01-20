@@ -57,7 +57,6 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   tabs,
   activeTabId,
   onTabSwitch,
-  onTabClose,
   onNewComparison,
   cachedData,
   onUpdateCache,
@@ -73,7 +72,6 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [satelliteData, setSatelliteData] = useState<ChangeDetectionResponse | null>(null);
   const [ndviData, setNdviData] = useState<NDVIAnalysisResponse | null>(null);
-  const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
   const [showApiInstructions, setShowApiInstructions] = useState(false);
   const { isLoaded } = useGoogleMaps();
 
@@ -86,7 +84,6 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
       setSatelliteData(cachedData.satelliteData);
       setNdviData(cachedData.ndviData);
       setIsGeocoding(false);
-      setIsSatelliteLoading(false);
       return;
     }
 
@@ -111,7 +108,6 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
       setBusinesses(realBusinesses);
 
       // Load satellite data (with fallback if API is not available)
-      setIsSatelliteLoading(true);
       try {
         // Check if API is available first
         await unifiedApiService.healthCheck();
@@ -162,8 +158,6 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
           ndviData: null,
           isLoaded: true,
         });
-      } finally {
-        setIsSatelliteLoading(false);
       }
 
       setIsGeocoding(false);

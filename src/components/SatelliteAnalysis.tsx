@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Download, RefreshCw, TrendingUp } from 'lucide-react';
 import { unifiedApiService, ChangeDetectionResponse, NDVIAnalysisResponse } from '../services/unifiedApiService';
 import { Location } from '../types';
