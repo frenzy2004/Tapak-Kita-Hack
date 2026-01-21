@@ -58,8 +58,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         const z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
 
         positions.push(x, y, z);
-        // Use dark dots for better visibility on light background
-        colors.push(0, 0, 0);
+        // Use white/gray dots for better visibility on dark background
+        colors.push(0.3, 0.3, 0.3);
       }
     }
 

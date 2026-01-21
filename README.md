@@ -100,6 +100,7 @@ A comprehensive location analysis tool that helps businesses make informed decis
 ```
 src/
 ├── components/           # Reusable components
+
 │   ├── charts/          # Chart components
 │   ├── GoogleMap.tsx    # Map component
 │   ├── BusinessCard.tsx # Business listing card

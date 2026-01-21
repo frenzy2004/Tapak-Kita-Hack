@@ -22,7 +22,7 @@ function App() {
 
     // Mark all existing tabs as inactive
     const updatedTabs = analysisTabs.map(tab => ({ ...tab, isActive: false }));
-    
+
     setAnalysisTabs([...updatedTabs, newTab]);
     setActiveTabId(newTab.id);
     setCurrentPage('analysis');
@@ -49,7 +49,7 @@ function App() {
 
   const handleTabClose = (tabId: string) => {
     const updatedTabs = analysisTabs.filter(tab => tab.id !== tabId);
-    
+
     if (updatedTabs.length === 0) {
       setCurrentPage('request');
       setActiveTabId(null);
@@ -61,7 +61,7 @@ function App() {
         setActiveTabId(newActiveTab.id);
       }
     }
-    
+
     setAnalysisTabs(updatedTabs);
   };
 
@@ -70,7 +70,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="App min-h-screen bg-background bg-grid-pattern text-foreground font-body selection:bg-primary/30">
       {currentPage === 'request' && (
         <LocationRequest onSubmit={handleLocationSubmit} />
       )}

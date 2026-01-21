@@ -26,30 +26,91 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
       zoom: 14,
       styles: [
         {
-          featureType: 'poi',
-          elementType: 'geometry',
-          stylers: [{ color: '#eeeeee' }],
+          "elementType": "geometry",
+          "stylers": [{ "color": "#f5f5f5" }] // Light gray base
         },
         {
-          featureType: 'poi',
-          elementType: 'labels.text.stroke',
-          stylers: [{ color: '#ffffff' }],
+          "elementType": "labels.icon",
+          "stylers": [{ "visibility": "off" }]
         },
         {
-          featureType: 'poi',
-          elementType: 'labels.text.fill',
-          stylers: [{ color: '#757575' }],
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#616161" }]
         },
         {
-          featureType: 'water',
-          elementType: 'geometry',
-          stylers: [{ color: '#c9c9c9' }],
+          "elementType": "labels.text.stroke",
+          "stylers": [{ "color": "#f5f5f5" }]
         },
         {
-          featureType: 'water',
-          elementType: 'labels.text.fill',
-          stylers: [{ color: '#9e9e9e' }],
+          "featureType": "administrative.land_parcel",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#bdbdbd" }]
         },
+        {
+          "featureType": "poi",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#eeeeee" }]
+        },
+        {
+          "featureType": "poi",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#757575" }]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#e5e5e5" }]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#9e9e9e" }]
+        },
+        {
+          "featureType": "road",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#ffffff" }]
+        },
+        {
+          "featureType": "road.arterial",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#757575" }]
+        },
+        {
+          "featureType": "road.highway",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#dadada" }]
+        },
+        {
+          "featureType": "road.highway",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#616161" }]
+        },
+        {
+          "featureType": "road.local",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#9e9e9e" }]
+        },
+        {
+          "featureType": "transit.line",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#e5e5e5" }]
+        },
+        {
+          "featureType": "transit.station",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#eeeeee" }]
+        },
+        {
+          "featureType": "water",
+          "elementType": "geometry",
+          "stylers": [{ "color": "#c9c9c9" }] // Muted water
+        },
+        {
+          "featureType": "water",
+          "elementType": "labels.text.fill",
+          "stylers": [{ "color": "#9e9e9e" }]
+        }
       ],
     });
 
@@ -63,7 +124,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
       icon: {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#3B82F6"/>
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#F43F5E"/>
             <circle cx="12" cy="9" r="2.5" fill="white"/>
           </svg>
         `),
@@ -74,8 +135,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
 
     // Add initial radius circles (300m and 1km)
     const radii = [300, 1000];
-    const colors = ['#EF4444', '#3B82F6'];
-    
+    const colors = ['#F43F5E', '#FDE68A'];
+
     radii.forEach((radius, index) => {
       const circle = new (window as any).google.maps.Circle({
         strokeColor: colors[index],
@@ -109,7 +170,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
         icon: {
           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EF4444"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#F43F5E"/>
               <circle cx="12" cy="9" r="2.5" fill="white"/>
             </svg>
           `),
@@ -134,15 +195,15 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
     if (mapInstanceRef.current && location && isInitialized) {
       mapInstanceRef.current.setCenter(location);
       mapInstanceRef.current.setZoom(14);
-      
+
       // Clear existing circles and add new ones
       circlesRef.current.forEach(circle => circle.setMap(null));
       circlesRef.current = [];
-      
+
       // Add new radius circles (300m and 1km)
       const radii = [300, 1000];
-      const colors = ['#EF4444', '#3B82F6'];
-      
+      const colors = ['#F43F5E', '#FDE68A'];
+
       radii.forEach((radius, index) => {
         const circle = new (window as any).google.maps.Circle({
           strokeColor: colors[index],
@@ -156,7 +217,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
         });
         circlesRef.current.push(circle);
       });
-      
+
       // Update main marker position
       if (mainMarkerRef.current) {
         mainMarkerRef.current.setPosition(location);

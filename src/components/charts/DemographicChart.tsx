@@ -14,10 +14,10 @@ const DemographicChart: React.FC<DemographicChartProps> = ({ data }) => {
     datasets: [
       {
         data: [data.office, data.residents],
-        backgroundColor: ['hsl(199, 89%, 48%)', 'hsl(188, 94%, 43%)'],
+        backgroundColor: ['#F43F5E', '#FDE68A'],
         borderColor: ['#ffffff', '#ffffff'],
         borderWidth: 3,
-        hoverBackgroundColor: ['hsl(199, 89%, 42%)', 'hsl(188, 94%, 37%)'],
+        hoverBackgroundColor: ['#E11D48', '#FCD34D'],
       },
     ],
   };
@@ -31,9 +31,10 @@ const DemographicChart: React.FC<DemographicChartProps> = ({ data }) => {
         labels: {
           padding: 20,
           usePointStyle: true,
-          color: '#374151',
+          color: '#1C1917',
           font: {
             size: 14,
+            family: 'Inter',
           },
         },
       },
@@ -43,9 +44,12 @@ const DemographicChart: React.FC<DemographicChartProps> = ({ data }) => {
             return `${context.label}: ${context.parsed}%`;
           },
         },
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#ffffff',
-        bodyColor: '#ffffff',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#1C1917',
+        bodyColor: '#78716C',
+        borderColor: '#E7E5E4',
+        borderWidth: 1,
+        bodyFont: { family: 'Inter', size: 12 },
       },
     },
     cutout: '60%',

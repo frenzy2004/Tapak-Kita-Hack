@@ -206,85 +206,80 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
   };
 
   return (
-    <div className="flex flex-col h-full bg-card">
-      {/* Messages - Garuda Style - FULLY SCROLLABLE */}
-      <div className="flex-1 overflow-y-auto relative">
-        <div className="p-4 space-y-4">
-          {/* Header - SCROLLS WITH MESSAGES */}
-          <div className="pb-4 border-b border-border/50">
-            <h2 className="text-lg font-semibold text-foreground">Tapak AI</h2>
-            <p className="text-sm max-w-sm text-muted-foreground">
-              Ask questions about your location analysis results
-            </p>
-          </div>
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex gap-3 animate-fade-in ${
-                message.isUser ? 'flex-row-reverse' : 'flex-row'
+    <div className="flex flex-col h-full bg-white">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto relative p-4 space-y-6">
+        <div className="pb-4 border-b border-border">
+          <h2 className="text-lg font-heading font-bold text-foreground">Tapak AI</h2>
+          <p className="text-sm max-w-sm text-foreground-muted font-body">
+            Ask questions about your location analysis results
+          </p>
+        </div>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex gap-3 animate-fade-in ${message.isUser ? 'flex-row-reverse' : 'flex-row'
               }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm ${message.isUser
+                  ? 'bg-white text-primary border border-primary/20'
+                  : 'bg-gradient-to-br from-primary to-secondary text-white'
+                }`}
+            >
+              {message.isUser ? 'U' : 'AI'}
+            </div>
+            <div
+              className={`flex-1 space-y-2 max-w-[85%] ${message.isUser ? 'flex justify-end' : ''}`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
-                  message.isUser
-                    ? 'bg-white text-black'
-                    : 'bg-secondary text-secondary-foreground'
-                }`}
-              >
-                {message.isUser ? 'U' : 'AI'}
-              </div>
-              <div
-                className={`flex-1 space-y-2 ${message.isUser ? '' : ''}`}
+                className={`rounded-2xl p-4 shadow-sm break-words ${message.isUser
+                    ? 'bg-primary text-white rounded-tr-sm'
+                    : 'bg-[#F5F5F4] text-[#1C1917] rounded-tl-sm'
+                  }`}
               >
                 <div
-                  className={`rounded-lg p-3 max-w-none break-words ${
-                    message.isUser
-                      ? 'bg-primary/10 text-foreground'
-                      : 'bg-secondary text-foreground'
-                  }`}
-                >
-                  <div
-                    className="text-sm leading-relaxed prose prose-invert max-w-none [&>strong]:text-accent [&>strong]:font-semibold"
-                    dangerouslySetInnerHTML={{
-                      __html: message.text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/^• (.+)$/gm, '<div style="margin-left: 1rem; margin-bottom: 0.25rem;">• $1</div>')
-                        .replace(/\n\n/g, '<div style="margin-bottom: 1rem;"></div>')
-                        .replace(/\n/g, '<br />')
-                    }}
-                  />
-                  <p className="text-xs mt-1.5 text-muted-foreground">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
+                  className={`text-sm leading-relaxed prose max-w-none ${message.isUser ? 'prose-invert' : 'prose-stone'
+                    } [&>strong]:font-bold`}
+                  dangerouslySetInnerHTML={{
+                    __html: message.text
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/^• (.+)$/gm, '<div style="margin-left: 1rem; margin-bottom: 0.25rem;">• $1</div>')
+                      .replace(/\n\n/g, '<div style="margin-bottom: 1rem;"></div>')
+                      .replace(/\n/g, '<br />')
+                  }}
+                />
+                <p className={`text-[10px] mt-2 font-medium ${message.isUser ? 'text-white/80' : 'text-gray-400'}`}>
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
 
-          {isTyping && (
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center">
-                <Bot className="w-4 h-4 text-primary" />
-              </div>
-              <div className="bg-card border border-border px-4 py-3 rounded-lg">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-                </div>
+        {isTyping && (
+          <div className="flex gap-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
+              <Bot className="w-4 h-4 text-white" />
+            </div>
+            <div className="bg-[#F5F5F4] px-4 py-3 rounded-2xl rounded-tl-sm">
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
               </div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input - Garuda Style */}
-      <div className="border-t border-border/50 p-4">
-        <div className="flex items-center gap-3">
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-border">
+        <div className="flex items-end gap-3 bg-[#F5F5F4] p-2 rounded-3xl border border-transparent focus-within:border-primary/20 focus-within:bg-white focus-within:shadow-md transition-all duration-300">
           <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -294,15 +289,16 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
                 handleSendMessage();
               }
             }}
-            placeholder="Ask about location analysis results..."
-            className="flex-1 resize-none h-11 w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all overflow-hidden"
+            placeholder="Ask anything..."
+            className="flex-1 resize-none max-h-32 min-h-[44px] w-full px-4 py-3 bg-transparent border-none text-foreground text-sm placeholder:text-gray-400 focus:outline-none focus:ring-0"
             disabled={isTyping}
             rows={1}
+            style={{ height: 'auto', overflowY: 'hidden' }}
           />
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isTyping}
-            className="h-11 w-11 bg-primary text-black rounded-lg hover:bg-primary/90 hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center flex-shrink-0"
+            className="h-10 w-10 bg-primary text-white rounded-full hover:bg-primary-hover hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center flex-shrink-0 mb-0.5 mr-0.5"
             aria-label="Send message"
           >
             <Send className="w-4 h-4" />

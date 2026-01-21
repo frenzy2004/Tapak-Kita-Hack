@@ -64,11 +64,11 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
     for (let i = 1; i < annotations.length; i++) {
       const current = annotations[i];
       const previous = annotations[i - 1];
-      
+
       if (Math.abs(current.left - previous.left) < minDistance) {
         // Stagger the current annotation
         current.top = previous.top + staggerOffset;
-        
+
         // If it would go too far down, move it up instead
         if (current.top > 70) {
           current.top = Math.max(previous.top - staggerOffset, 5);
@@ -85,13 +85,13 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
       {
         label: 'Demand Score',
         data: data.map(d => d.demand),
-        borderColor: 'hsl(262, 83%, 58%)',
-        backgroundColor: 'rgba(139, 92, 246, 0.15)',
+        borderColor: '#F43F5E',
+        backgroundColor: 'rgba(244, 63, 94, 0.15)',
         borderWidth: 3,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: 'hsl(262, 83%, 58%)',
-        pointBorderColor: 'hsl(240, 10%, 8%)',
+        pointBackgroundColor: '#F43F5E',
+        pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
         pointRadius: 6,
         pointHoverRadius: 8,
@@ -119,13 +119,15 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
             ];
           },
         },
-        backgroundColor: 'rgba(15, 15, 25, 0.95)',
-        titleColor: '#ffffff',
-        bodyColor: '#9ca3af',
-        borderColor: 'hsl(262, 83%, 58%)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#1C1917',
+        bodyColor: '#78716C',
+        borderColor: '#E7E5E4',
         borderWidth: 1,
         cornerRadius: 8,
         padding: 12,
+        titleFont: { family: 'Inter', size: 13, weight: 'bold' as const },
+        bodyFont: { family: 'Inter', size: 12 },
       },
     },
     scales: {
@@ -134,13 +136,14 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
         min: 60,
         max: 100,
         grid: {
-          color: 'rgba(255, 255, 255, 0.05)',
+          color: 'rgba(0, 0, 0, 0.05)',
           drawBorder: false,
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#78716C',
           font: {
             size: 12,
+            family: 'Inter',
           },
         },
       },
@@ -149,9 +152,10 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
           display: false,
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#78716C',
           font: {
             size: 12,
+            family: 'Inter',
           },
         },
       },
@@ -177,13 +181,12 @@ const SeasonalDemandChart: React.FC<SeasonalDemandChartProps> = ({ data }) => {
         {annotations.map((annotation) => (
           <div
             key={`${annotation.index}-${annotation.type}`}
-            className={`absolute text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm transition-all duration-300 hover:scale-105 ${
-              annotation.type === 'peak'
-                ? 'bg-success/20 text-success border border-success/30'
-                : annotation.type === 'moderate'
+            className={`absolute text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm transition-all duration-300 hover:scale-105 ${annotation.type === 'peak'
+              ? 'bg-success/20 text-success border border-success/30'
+              : annotation.type === 'moderate'
                 ? 'bg-accent/20 text-accent border border-accent/30'
                 : 'bg-destructive/20 text-destructive border border-destructive/30'
-            }`}
+              }`}
             style={{
               left: `${annotation.left}%`,
               top: `${annotation.top}px`,

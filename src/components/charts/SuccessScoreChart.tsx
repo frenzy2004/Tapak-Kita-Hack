@@ -43,7 +43,7 @@ const SuccessScoreChart: React.FC<SuccessScoreChartProps> = ({ score }) => {
               cx="80"
               cy="80"
               r={radius}
-              stroke="rgba(255, 255, 255, 0.05)"
+              stroke="#E7E5E4"
               strokeWidth="12"
               fill="none"
             />
