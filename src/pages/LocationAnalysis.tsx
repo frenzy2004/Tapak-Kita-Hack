@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, ArrowLeft, Map, BarChart3, Leaf, Activity, GitCompare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
+// ConnectivityBackground removed
 
 // Components
 import GoogleMap from '../components/GoogleMap';
@@ -16,9 +17,9 @@ import SatelliteAnalysis from '../components/SatelliteAnalysis';
 import NDVIAnalysis from '../components/NDVIAnalysis';
 import ApiInstructions from '../components/ApiInstructions';
 import { ClayBackground } from '../components/ClayBackground';
+import { Globe } from '../components/ui/globe';
 import FloatingAI from '../components/FloatingAI'; // NEW
 import PreviewCard from '../components/PreviewCard'; // NEW
-import VantaBackground from '../components/VantaBackground'; // NEW
 
 // Types and Utils
 import { LocationAnalysis as LocationAnalysisType, Business, AnalysisTab, Location } from '../types';
@@ -227,7 +228,13 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   );
 
   return (
-    <VantaBackground className="h-screen w-screen bg-background text-foreground font-body flex flex-col overflow-hidden relative">
+    <div className="h-screen w-screen bg-transparent text-foreground font-body flex flex-col overflow-hidden relative">
+      <ClayBackground />
+      {/* Background Globe without Overlay */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none">
+        <Globe className="scale-150 sm:scale-125" />
+      </div>
+
       {/* Floating AI Assistant (Always available) */}
       <FloatingAI
         analysisContext={{
@@ -254,17 +261,17 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
             className="flex-1 p-6 lg:p-8 overflow-y-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-8 max-w-[1600px] mx-auto w-full">
+            <div className="relative z-50 flex items-center justify-between mb-8 max-w-[1600px] mx-auto w-full">
               <div className="flex items-center gap-4">
                 <button
                   onClick={onBack}
-                  className="btn-icon bg-white text-foreground hover:text-primary transition-colors border border-border shadow-sm"
+                  className="btn-icon bg-white text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-colors border border-purple-100 shadow-sm"
                   aria-label="Go back"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                  <h1 className="text-3xl font-heading font-bold text-foreground tracking-tight flex items-center gap-3">
+                  <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight flex items-center gap-3">
                     {location}
                     <span className="text-lg font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
                       {businessType}
@@ -409,7 +416,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col h-full bg-background relative"
+            className="flex-1 flex flex-col h-full bg-white/95 relative"
           >
             {/* Back Navigation Bar */}
             <div className="bg-white/90 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between z-30 sticky top-0">
@@ -533,7 +540,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
         isVisible={showApiInstructions}
         onClose={() => setShowApiInstructions(false)}
       />
-    </VantaBackground>
+    </div>
   );
 };
 

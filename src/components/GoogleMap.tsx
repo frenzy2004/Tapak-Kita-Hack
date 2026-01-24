@@ -21,137 +21,50 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
   const initializeMap = () => {
     if (!mapRef.current || !window.google || mapInstanceRef.current) return;
 
-    const map = new (window as any).google.maps.Map(mapRef.current, {
-      center: location,
-      zoom: 14,
-      styles: [
-        {
-          "elementType": "geometry",
-          "stylers": [{ "color": "#f5f5f5" }] // Light gray base
-        },
-        {
-          "elementType": "labels.icon",
-          "stylers": [{ "visibility": "off" }]
-        },
-        {
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#616161" }]
-        },
-        {
-          "elementType": "labels.text.stroke",
-          "stylers": [{ "color": "#f5f5f5" }]
-        },
-        {
-          "featureType": "administrative.land_parcel",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#bdbdbd" }]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#eeeeee" }]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#757575" }]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#e5e5e5" }]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#9e9e9e" }]
-        },
-        {
-          "featureType": "road",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#ffffff" }]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#757575" }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#dadada" }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#616161" }]
-        },
-        {
-          "featureType": "road.local",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#9e9e9e" }]
-        },
-        {
-          "featureType": "transit.line",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#e5e5e5" }]
-        },
-        {
-          "featureType": "transit.station",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#eeeeee" }]
-        },
-        {
-          "featureType": "water",
-          "elementType": "geometry",
-          "stylers": [{ "color": "#c9c9c9" }] // Muted water
-        },
-        {
-          "featureType": "water",
-          "elementType": "labels.text.fill",
-          "stylers": [{ "color": "#9e9e9e" }]
-        }
-      ],
-    });
-
-    mapInstanceRef.current = map;
-
-    // Add initial main location marker
-    mainMarkerRef.current = new (window as any).google.maps.Marker({
-      position: location,
-      map,
-      title: 'Selected Location',
-      icon: {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#F43F5E"/>
-            <circle cx="12" cy="9" r="2.5" fill="white"/>
-          </svg>
-        `),
-        scaledSize: new (window as any).google.maps.Size(32, 32),
-        anchor: new (window as any).google.maps.Point(16, 32),
-      },
-    });
-
-    // Add initial radius circles (300m and 1km)
-    const radii = [300, 1000];
-    const colors = ['#F43F5E', '#FDE68A'];
-
-    radii.forEach((radius, index) => {
-      const circle = new (window as any).google.maps.Circle({
-        strokeColor: colors[index],
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: colors[index],
-        fillOpacity: 0.1,
-        map,
+    try {
+      console.log('GoogleMap: Attempting to create map instance...');
+      const map = new (window as any).google.maps.Map(mapRef.current, {
         center: location,
-        radius,
+        zoom: 14,
+        mapTypeId: 'roadmap', // Explicitly set map type
+        // styles: [] // Removed custom styles for testing
       });
-      circlesRef.current.push(circle);
-    });
 
-    setIsInitialized(true);
+      console.log('GoogleMap: Map instance created', map);
+
+      mapInstanceRef.current = map;
+
+      // Add initial main location marker
+      mainMarkerRef.current = new (window as any).google.maps.Marker({
+        position: location,
+        map,
+        title: 'Selected Location',
+      });
+
+      // Removed complex SVG icons and circles for now to isolate rendering
+
+      // Add initial radius circles (300m and 1km)
+      const radii = [300, 1000];
+      const colors = ['#F43F5E', '#FDE68A'];
+
+      radii.forEach((radius, index) => {
+        const circle = new (window as any).google.maps.Circle({
+          strokeColor: colors[index],
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: colors[index],
+          fillOpacity: 0.1,
+          map,
+          center: location,
+          radius,
+        });
+        circlesRef.current.push(circle);
+      });
+
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('GoogleMap: Error initializing map:', error);
+    }
   };
 
   const updateBusinessMarkers = () => {
@@ -271,7 +184,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ location, businesses, onBusinessC
     );
   }
 
-  return <div ref={mapRef} className={`rounded-lg ${className}`} />;
+  // DEBUG: Removed visual debug styles
+  return <div ref={mapRef} className={`rounded-lg ${className} h-full w-full`} style={{ minHeight: '400px' }} />;
 };
 
 export default GoogleMap;

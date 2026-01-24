@@ -9,9 +9,12 @@ export const useGoogleMaps = () => {
 
   useEffect(() => {
     if (!GOOGLE_MAPS_API_KEY) {
+      console.error('useGoogleMaps: No API key found');
       setLoadError('Google Maps API key not configured');
       return;
     }
+
+    console.log('useGoogleMaps: Initializing loader with key length:', GOOGLE_MAPS_API_KEY.length);
 
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_API_KEY,
@@ -22,10 +25,12 @@ export const useGoogleMaps = () => {
     loader
       .load()
       .then(() => {
+        console.log('useGoogleMaps: Loaded successfully');
         setIsLoaded(true);
         setLoadError(null);
       })
       .catch((error) => {
+        console.error('useGoogleMaps: Loader error:', error);
         setLoadError(`Failed to load Google Maps: ${error.message}`);
       });
   }, []);

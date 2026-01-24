@@ -26,9 +26,9 @@ const PreviewCard: React.FC<PreviewCardProps> = ({
         <motion.div
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             className={cn(
-                "relative group cursor-pointer overflow-hidden rounded-3xl border shadow-soft transition-all duration-300 hover:shadow-lg flex flex-col h-full",
-                // Glassmorphism styles
-                "bg-white/40 backdrop-blur-md border-blue-400/20",
+                "relative group cursor-pointer overflow-hidden rounded-[40px] border border-white/60 shadow-clayCard transition-all duration-300 hover:shadow-clayCardHover hover:scale-[1.01] flex flex-col h-full",
+                // Claymorphism styles (High Transparency)
+                "bg-white/20 backdrop-blur-md",
                 className
             )}
             onClick={onClick}
