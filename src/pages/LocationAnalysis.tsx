@@ -19,6 +19,7 @@ import KPICards from '../components/KPICards';
 import RentLocationContent from '../components/RentLocationContent';
 import SatelliteAnalysis from '../components/SatelliteAnalysis';
 import NDVIAnalysis from '../components/NDVIAnalysis';
+import WeatherCard from '../components/WeatherCard';
 
 import ApiInstructions from '../components/ApiInstructions';
 import { LocationAnalysis as LocationAnalysisType, Business, AnalysisTab, Location } from '../types';
@@ -558,6 +559,9 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                     </div>
 
                     <KPICards kpis={analysis.kpis} />
+
+                    {/* Weather Forecast */}
+                    <WeatherCard location={location} />
 
                     <div id="success-score-chart">
                       <SuccessScoreChart score={analysis.successScore} />
