@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, ChevronDown } from 'lucide-react';
 import { DottedSurface } from '../components/ui/dotted-surface';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface LocationRequestProps {
   onSubmit: (location: string, businessType: string) => void;
@@ -15,6 +17,7 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const autocompleteService = useRef<any | null>(null);
   const { isLoaded } = useGoogleMaps();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (isLoaded && window.google) {
@@ -24,7 +27,7 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
 
   const handleLocationChange = (value: string) => {
     setLocation(value);
-    
+
     if (value.length > 2 && autocompleteService.current) {
       autocompleteService.current.getPlacePredictions(
         {
@@ -83,20 +86,27 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-8 py-16 relative overflow-hidden">
-      {/* Video Background */}
+      {/* Theme Toggle - Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
+      {/* Video Background - switches based on theme */}
       <video
+        key={isDark ? 'dark-video' : 'light-video'}
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-500"
       >
-        <source src="/motion.webm" type="video/webm" />
+        <source src={isDark ? '/motion.webm' : '/video.webm'} type="video/webm" />
       </video>
-      {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/40 z-0"></div>
+      {/* Overlay for better text readability - adapts to theme */}
+      <div className={`absolute inset-0 z-0 transition-colors duration-500 ${isDark ? 'bg-black/40' : 'bg-white/30'
+        }`}></div>
       <DottedSurface />
-      
+
       <div className="w-full max-w-7xl space-y-12 animate-fade-in relative z-10">
         {/* Brand Header */}
         <div className="text-center space-y-6">
@@ -105,11 +115,13 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
               <MapPin className="w-16 h-16 text-blue-500 drop-shadow-lg" fill="currentColor" />
               <div className="absolute inset-0 blur-xl bg-blue-500/30"></div>
             </div>
-            <h1 className="text-7xl font-bold text-white drop-shadow-2xl">
+            <h1 className={`text-7xl font-bold drop-shadow-2xl ${isDark ? 'text-white' : 'text-gray-900'
+              }`}>
               Tapak
             </h1>
           </div>
-          <p className="text-2xl text-white/90 font-medium drop-shadow-lg">
+          <p className={`text-2xl font-medium drop-shadow-lg ${isDark ? 'text-white/90' : 'text-gray-700'
+            }`}>
             Finding the best location for your business
           </p>
         </div>
@@ -130,7 +142,7 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
                 required
               />
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-              
+
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-300 rounded-lg shadow-2xl max-h-80 overflow-y-auto">
                   {suggestions.map((suggestion) => (

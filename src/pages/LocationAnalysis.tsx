@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { cn } from '../lib/utils';
 import GoogleMap from '../components/GoogleMap';
+import ThemeToggle from '../components/ThemeToggle';
 // import TabNavigation from '../components/TabNavigation';
 import SeasonalDemandChart from '../components/charts/SeasonalDemandChart';
 import DemographicChart from '../components/charts/DemographicChart';
@@ -336,8 +337,8 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                           {activeView === "map"
                             ? "Interactive mapping"
                             : activeView === "analytics"
-                            ? "Live analytics"
-                            : "NDVI analysis"}
+                              ? "Live analytics"
+                              : "NDVI analysis"}
                         </span>
                       </div>
                     </>
@@ -347,7 +348,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
 
               {/* Right: Action Buttons */}
               <div className="flex items-center gap-2">
-                
+                <ThemeToggle />
                 <button
                   onClick={onNewComparison}
                   className="btn-icon btn-ghost"
@@ -374,364 +375,208 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
           </div>
 
           {/* Tab Content with Animations */}
-            <TabsContent value="map" className="flex-1 m-0 h-full overflow-hidden">
-              <motion.div
-                key={`map-view-${activeTabId}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="h-full"
-              >
-                {isGeocoding ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
-                      <div className="text-muted-foreground">Analyzing location data...</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div id="google-map-container" className="h-full">
-                    <GoogleMap
-                      location={actualLocation!}
-                      businesses={businesses}
-                      onBusinessClick={handleBusinessClick}
-                      className="h-full w-full"
-                    />
-                  </div>
-                )}
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="flex-1 m-0 h-full overflow-y-auto">
-              <motion.div
-                key={`analytics-view-${activeTabId}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="min-h-full"
-              >
-                {/* Sub-tabs for Analytics - SCROLLS WITH CONTENT */}
-                <div className="border-b border-border bg-background px-6 py-3">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setActiveTab('overview')}
-                      className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                        activeTab === 'overview' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Overview
-                      {activeTab === 'overview' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('businesses')}
-                      className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                        activeTab === 'businesses' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Competitor Nearby
-                      {activeTab === 'businesses' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('rent')}
-                      className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                        activeTab === 'rent' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Rent Location
-                      {activeTab === 'rent' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('ai-insight')}
-                      className={`px-4 py-2 text-sm font-medium transition-all relative ${
-                        activeTab === 'ai-insight' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Satellite Data
-                      {activeTab === 'ai-insight' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
-                      )}
-                    </button>
+          <TabsContent value="map" className="flex-1 m-0 h-full overflow-hidden">
+            <motion.div
+              key={`map-view-${activeTabId}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="h-full"
+            >
+              {isGeocoding ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+                    <div className="text-muted-foreground">Analyzing location data...</div>
                   </div>
                 </div>
-
-                {/* Sub-tab Content */}
-                <div>
-                  {activeTab === 'overview' && (
-                    <div className="p-6 space-y-6">
-                      {/* Statistics Header Section - Garuda Style */}
-                      <div className="card-elevated p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                            <Map className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h2 className="text-xl font-bold text-foreground">Location Analysis Complete</h2>
-                            <p className="text-sm text-muted-foreground">AI-powered insights with comprehensive data</p>
-                          </div>
-                        </div>
-
-                        {/* Key Metrics Row */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                          <div className="p-4 bg-background-alt rounded-lg border border-border">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 rounded-full bg-success"></div>
-                              <span className="text-xs text-muted-foreground uppercase tracking-wide">Success Score</span>
-                            </div>
-                            <div className="text-3xl font-bold text-foreground">{analysis.successScore}%</div>
-                          </div>
-                          <div className="p-4 bg-background-alt rounded-lg border border-border">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 rounded-full bg-accent"></div>
-                              <span className="text-xs text-muted-foreground uppercase tracking-wide">Competitors</span>
-                            </div>
-                            <div className="text-3xl font-bold text-foreground">{businesses.length}</div>
-                          </div>
-                          <div className="p-4 bg-background-alt rounded-lg border border-border">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 rounded-full bg-primary"></div>
-                              <span className="text-xs text-muted-foreground uppercase tracking-wide">Analysis Type</span>
-                            </div>
-                            <div className="text-sm font-bold text-foreground">Location Intelligence</div>
-                          </div>
-                          <div className="p-4 bg-background-alt rounded-lg border border-border">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 rounded-full bg-warning"></div>
-                              <span className="text-xs text-muted-foreground uppercase tracking-wide">Data Quality</span>
-                            </div>
-                            <div className="text-sm font-bold text-success">High (92%)</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* AI Analysis Insights */}
-                      <div className="card p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
-                          <h3 className="text-lg font-semibold text-foreground">AI Analysis Insights</h3>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-3 p-3 bg-success/5 border border-success/20 rounded-lg">
-                            <span className="text-success font-bold">✓</span>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">High-Quality Location Data</p>
-                              <p className="text-xs text-muted-foreground">Real-time analysis with comprehensive market insights</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                            <span className="text-primary font-bold">★</span>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">AI-Enhanced Analytics</p>
-                              <p className="text-xs text-muted-foreground">Machine learning models provide advanced pattern detection</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-accent/5 border border-accent/20 rounded-lg">
-                            <span className="text-accent font-bold">◆</span>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">Market Trends Analysis</p>
-                              <p className="text-xs text-muted-foreground">Seasonal patterns and demographic insights detected</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <KPICards kpis={analysis.kpis} />
-
-                      <div id="success-score-chart">
-                        <SuccessScoreChart score={analysis.successScore} />
-                      </div>
-
-                      <div id="seasonal-demand-chart">
-                        <SeasonalDemandChart data={analysis.seasonalDemand} />
-                      </div>
-
-                      <div id="demographic-chart">
-                        <DemographicChart data={analysis.demographics} />
-                      </div>
-
-                      <div id="competitor-chart">
-                        <CompetitorChart data={analysis.competitors} />
-                      </div>
-
-                      <div id="location-profile-chart">
-                        <LocationProfileChart data={analysis.locationProfile} />
-                      </div>
-
-                      <div id="competition-density-chart">
-                        <CompetitionDensityChart data={analysis.competitionDensity} />
-                      </div>
-                    </div>
-                  )}
-
-                  {activeTab === 'businesses' && (
-                    <div className="p-6 space-y-4">
-                      <div className="card p-4 flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">Competitor Analysis</h3>
-                          <p className="text-sm text-muted-foreground">{businesses.length} businesses found within 1km radius</p>
-                        </div>
-                        <div className="badge-accent">
-                          <span className="text-xs font-medium">Live Data</span>
-                        </div>
-                      </div>
-                      {businesses.map((business) => (
-                        <BusinessCard
-                          key={business.id}
-                          business={business}
-                          onClick={handleBusinessClick}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {activeTab === 'rent' && (
-                    <div className="p-6">
-                      <div className="card p-6 mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
-                          <h3 className="text-lg font-semibold text-foreground">Market Data & Rent Analysis</h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">Real estate and rental market insights for this location</p>
-                      </div>
-                      <RentLocationContent location={location} businessType={businessType} />
-                    </div>
-                  )}
-
-                  {activeTab === 'ai-insight' && (
-                    <div className="pb-6">
-                      <SatelliteAnalysis
-                        location={location}
-                        coordinates={actualLocation || undefined}
-                        onAnalysisComplete={(data) => setSatelliteData(data)}
-                        initialData={satelliteData}
-                      />
-                    </div>
-                  )}
+              ) : (
+                <div id="google-map-container" className="h-full">
+                  <GoogleMap
+                    location={actualLocation!}
+                    businesses={businesses}
+                    onBusinessClick={handleBusinessClick}
+                    className="h-full w-full"
+                  />
                 </div>
-              </motion.div>
-            </TabsContent>
+              )}
+            </motion.div>
+          </TabsContent>
 
-            <TabsContent value="ndvi" className="flex-1 m-0 h-full overflow-auto">
-              <motion.div
-                key={`ndvi-view-${activeTabId}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="h-full"
-              >
-                <NDVIAnalysis
-                  location={location}
-                  coordinates={actualLocation || undefined}
-                  onAnalysisComplete={(data) => setNdviData(data)}
-                  initialData={ndviData}
-                />
-              </motion.div>
-            </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Mobile Analysis Panel Overlay */}
-        {isPanelOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden bg-background">
-            <div className="h-full flex flex-col">
-              {/* Panel Header */}
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => setIsPanelOpen(false)}
-                    className="btn-icon btn-ghost"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                  <div className="flex-1 text-center">
-                    <h2 className="text-lg font-semibold text-foreground">Analysis Dashboard</h2>
-                    <p className="text-sm text-muted-foreground">{businessType} in {location}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile Tabs */}
-              <div className="bg-background border-b border-border px-4 py-2">
-                <div className="flex gap-2 overflow-x-auto">
+          <TabsContent value="analytics" className="flex-1 m-0 h-full overflow-y-auto">
+            <motion.div
+              key={`analytics-view-${activeTabId}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="min-h-full"
+            >
+              {/* Sub-tabs for Analytics - SCROLLS WITH CONTENT */}
+              <div className="border-b border-border bg-background px-6 py-3">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => setActiveTab('overview')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      activeTab === 'overview'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium transition-all relative ${activeTab === 'overview' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Overview
+                    {activeTab === 'overview' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
+                    )}
                   </button>
                   <button
                     onClick={() => setActiveTab('businesses')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      activeTab === 'businesses'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium transition-all relative ${activeTab === 'businesses' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
-                    Businesses
+                    Competitor Nearby
+                    {activeTab === 'businesses' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
+                    )}
                   </button>
                   <button
                     onClick={() => setActiveTab('rent')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      activeTab === 'rent'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium transition-all relative ${activeTab === 'rent' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
-                    Rent
+                    Rent Location
+                    {activeTab === 'rent' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
+                    )}
                   </button>
                   <button
                     onClick={() => setActiveTab('ai-insight')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                      activeTab === 'ai-insight'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium transition-all relative ${activeTab === 'ai-insight' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
-                    AI Chat
+                    Satellite Data
+                    {activeTab === 'ai-insight' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary"></div>
+                    )}
                   </button>
                 </div>
               </div>
 
-              {/* Panel Content */}
-              <div className="flex-1 overflow-y-auto">
-                {activeTab === 'overview' ? (
-                  <div className="p-6 space-y-8">
-                    <div id="success-score-chart-mobile">
+              {/* Sub-tab Content */}
+              <div>
+                {activeTab === 'overview' && (
+                  <div className="p-6 space-y-6">
+                    {/* Statistics Header Section - Garuda Style */}
+                    <div className="card-elevated p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                          <Map className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-foreground">Location Analysis Complete</h2>
+                          <p className="text-sm text-muted-foreground">AI-powered insights with comprehensive data</p>
+                        </div>
+                      </div>
+
+                      {/* Key Metrics Row */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="p-4 bg-background-alt rounded-lg border border-border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-success"></div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">Success Score</span>
+                          </div>
+                          <div className="text-3xl font-bold text-foreground">{analysis.successScore}%</div>
+                        </div>
+                        <div className="p-4 bg-background-alt rounded-lg border border-border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-accent"></div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">Competitors</span>
+                          </div>
+                          <div className="text-3xl font-bold text-foreground">{businesses.length}</div>
+                        </div>
+                        <div className="p-4 bg-background-alt rounded-lg border border-border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-primary"></div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">Analysis Type</span>
+                          </div>
+                          <div className="text-sm font-bold text-foreground">Location Intelligence</div>
+                        </div>
+                        <div className="p-4 bg-background-alt rounded-lg border border-border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-warning"></div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">Data Quality</span>
+                          </div>
+                          <div className="text-sm font-bold text-success">High (92%)</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Analysis Insights */}
+                    <div className="card p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                        <h3 className="text-lg font-semibold text-foreground">AI Analysis Insights</h3>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 bg-success/5 border border-success/20 rounded-lg">
+                          <span className="text-success font-bold">✓</span>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">High-Quality Location Data</p>
+                            <p className="text-xs text-muted-foreground">Real-time analysis with comprehensive market insights</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                          <span className="text-primary font-bold">★</span>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">AI-Enhanced Analytics</p>
+                            <p className="text-xs text-muted-foreground">Machine learning models provide advanced pattern detection</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 bg-accent/5 border border-accent/20 rounded-lg">
+                          <span className="text-accent font-bold">◆</span>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Market Trends Analysis</p>
+                            <p className="text-xs text-muted-foreground">Seasonal patterns and demographic insights detected</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <KPICards kpis={analysis.kpis} />
+
+                    <div id="success-score-chart">
                       <SuccessScoreChart score={analysis.successScore} />
                     </div>
-                    <KPICards kpis={analysis.kpis} />
-                    <div id="seasonal-demand-chart-mobile">
+
+                    <div id="seasonal-demand-chart">
                       <SeasonalDemandChart data={analysis.seasonalDemand} />
                     </div>
-                    <div id="demographic-chart-mobile">
+
+                    <div id="demographic-chart">
                       <DemographicChart data={analysis.demographics} />
                     </div>
-                    <div id="competitor-chart-mobile">
+
+                    <div id="competitor-chart">
                       <CompetitorChart data={analysis.competitors} />
                     </div>
-                    <div id="location-profile-chart-mobile">
+
+                    <div id="location-profile-chart">
                       <LocationProfileChart data={analysis.locationProfile} />
                     </div>
-                    <div id="competition-density-chart-mobile">
+
+                    <div id="competition-density-chart">
                       <CompetitionDensityChart data={analysis.competitionDensity} />
                     </div>
                   </div>
-                ) : activeTab === 'businesses' ? (
+                )}
+
+                {activeTab === 'businesses' && (
                   <div className="p-6 space-y-4">
-                    <div className="text-sm text-muted-foreground mb-4">
-                      {businesses.length} businesses found within 1km radius
+                    <div className="card p-4 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Competitor Analysis</h3>
+                        <p className="text-sm text-muted-foreground">{businesses.length} businesses found within 1km radius</p>
+                      </div>
+                      <div className="badge-accent">
+                        <span className="text-xs font-medium">Live Data</span>
+                      </div>
                     </div>
                     {businesses.map((business) => (
                       <BusinessCard
@@ -741,53 +586,201 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                       />
                     ))}
                   </div>
-                ) : activeTab === 'rent' ? (
+                )}
+
+                {activeTab === 'rent' && (
                   <div className="p-6">
+                    <div className="card p-6 mb-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                        <h3 className="text-lg font-semibold text-foreground">Market Data & Rent Analysis</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Real estate and rental market insights for this location</p>
+                    </div>
                     <RentLocationContent location={location} businessType={businessType} />
                   </div>
-                ) : activeTab === 'ai-insight' ? (
-                  <div className="h-full">
-                    <AIAssistant
-                      onClose={() => setActiveTab('overview')}
-                      analysisContext={{
-                        location,
-                        businessType,
-                        successScore: analysis.successScore,
-                        competitorCount: businesses.length,
-                        satelliteData,
-                        ndviData,
-                        businesses,
-                      }}
+                )}
+
+                {activeTab === 'ai-insight' && (
+                  <div className="pb-6">
+                    <SatelliteAnalysis
+                      location={location}
+                      coordinates={actualLocation || undefined}
+                      onAnalysisComplete={(data) => setSatelliteData(data)}
+                      initialData={satelliteData}
                     />
-                  </div>
-                ) : (
-                  <div className="p-6">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground mb-2">Urban Development Analysis</h3>
-                        <p className="text-muted-foreground">Infrastructure and development insights for this location.</p>
-                      </div>
-                      <div className="grid gap-4">
-                        <div className="p-4 bg-muted rounded-lg">
-                          <h4 className="font-medium text-foreground mb-2">Public Transportation</h4>
-                          <p className="text-sm text-muted-foreground">Analysis of nearby transit options and accessibility.</p>
-                        </div>
-                        <div className="p-4 bg-muted rounded-lg">
-                          <h4 className="font-medium text-foreground mb-2">Future Developments</h4>
-                          <p className="text-sm text-muted-foreground">Planned infrastructure and construction projects in the area.</p>
-                        </div>
-                        <div className="p-4 bg-muted rounded-lg">
-                          <h4 className="font-medium text-foreground mb-2">Amenities</h4>
-                          <p className="text-sm text-muted-foreground">Nearby facilities, parks, schools, and shopping centers.</p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="ndvi" className="flex-1 m-0 h-full overflow-auto">
+            <motion.div
+              key={`ndvi-view-${activeTabId}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="h-full"
+            >
+              <NDVIAnalysis
+                location={location}
+                coordinates={actualLocation || undefined}
+                onAnalysisComplete={(data) => setNdviData(data)}
+                initialData={ndviData}
+              />
+            </motion.div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Mobile Analysis Panel Overlay */}
+      {isPanelOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden bg-background">
+          <div className="h-full flex flex-col">
+            {/* Panel Header */}
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setIsPanelOpen(false)}
+                  className="btn-icon btn-ghost"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="flex-1 text-center">
+                  <h2 className="text-lg font-semibold text-foreground">Analysis Dashboard</h2>
+                  <p className="text-sm text-muted-foreground">{businessType} in {location}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Tabs */}
+            <div className="bg-background border-b border-border px-4 py-2">
+              <div className="flex gap-2 overflow-x-auto">
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'overview'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab('businesses')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'businesses'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                >
+                  Businesses
+                </button>
+                <button
+                  onClick={() => setActiveTab('rent')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'rent'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                >
+                  Rent
+                </button>
+                <button
+                  onClick={() => setActiveTab('ai-insight')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'ai-insight'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                >
+                  AI Chat
+                </button>
+              </div>
+            </div>
+
+            {/* Panel Content */}
+            <div className="flex-1 overflow-y-auto">
+              {activeTab === 'overview' ? (
+                <div className="p-6 space-y-8">
+                  <div id="success-score-chart-mobile">
+                    <SuccessScoreChart score={analysis.successScore} />
+                  </div>
+                  <KPICards kpis={analysis.kpis} />
+                  <div id="seasonal-demand-chart-mobile">
+                    <SeasonalDemandChart data={analysis.seasonalDemand} />
+                  </div>
+                  <div id="demographic-chart-mobile">
+                    <DemographicChart data={analysis.demographics} />
+                  </div>
+                  <div id="competitor-chart-mobile">
+                    <CompetitorChart data={analysis.competitors} />
+                  </div>
+                  <div id="location-profile-chart-mobile">
+                    <LocationProfileChart data={analysis.locationProfile} />
+                  </div>
+                  <div id="competition-density-chart-mobile">
+                    <CompetitionDensityChart data={analysis.competitionDensity} />
+                  </div>
+                </div>
+              ) : activeTab === 'businesses' ? (
+                <div className="p-6 space-y-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    {businesses.length} businesses found within 1km radius
+                  </div>
+                  {businesses.map((business) => (
+                    <BusinessCard
+                      key={business.id}
+                      business={business}
+                      onClick={handleBusinessClick}
+                    />
+                  ))}
+                </div>
+              ) : activeTab === 'rent' ? (
+                <div className="p-6">
+                  <RentLocationContent location={location} businessType={businessType} />
+                </div>
+              ) : activeTab === 'ai-insight' ? (
+                <div className="h-full">
+                  <AIAssistant
+                    onClose={() => setActiveTab('overview')}
+                    analysisContext={{
+                      location,
+                      businessType,
+                      successScore: analysis.successScore,
+                      competitorCount: businesses.length,
+                      satelliteData,
+                      ndviData,
+                      businesses,
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">Urban Development Analysis</h3>
+                      <p className="text-muted-foreground">Infrastructure and development insights for this location.</p>
+                    </div>
+                    <div className="grid gap-4">
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-medium text-foreground mb-2">Public Transportation</h4>
+                        <p className="text-sm text-muted-foreground">Analysis of nearby transit options and accessibility.</p>
+                      </div>
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-medium text-foreground mb-2">Future Developments</h4>
+                        <p className="text-sm text-muted-foreground">Planned infrastructure and construction projects in the area.</p>
+                      </div>
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-medium text-foreground mb-2">Amenities</h4>
+                        <p className="text-sm text-muted-foreground">Nearby facilities, parks, schools, and shopping centers.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Hamburger Button for Mobile */}
       {!isPanelOpen && (
