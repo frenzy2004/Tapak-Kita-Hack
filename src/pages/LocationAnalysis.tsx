@@ -22,13 +22,13 @@ import NDVIAnalysis from '../components/NDVIAnalysis';
 
 import ApiInstructions from '../components/ApiInstructions';
 import { LocationAnalysis as LocationAnalysisType, Business, AnalysisTab, Location } from '../types';
-import { mockAnalysis } from '../data/mockData';
 import { geocodeLocation } from '../utils/geocoding';
 import { findNearbyBusinesses } from '../utils/placesService';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { generateEnhancedPDF } from '../utils/pdfExport';
 import { unifiedApiService, ChangeDetectionResponse, NDVIAnalysisResponse } from '../services/unifiedApiService';
 import { calculateSuccessScore, generateSeasonalDemand, calculateKPIs } from '../utils/analyticsCalculator';
+import { gatherLocationIntelligence, LocationIntelligenceData } from '../services/locationIntelligence';
 
 interface LocationAnalysisProps {
   tabId: string;
@@ -74,6 +74,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   const [satelliteData, setSatelliteData] = useState<ChangeDetectionResponse | null>(null);
   const [ndviData, setNdviData] = useState<NDVIAnalysisResponse | null>(null);
   const [showApiInstructions, setShowApiInstructions] = useState(false);
+  const [locationIntel, setLocationIntel] = useState<LocationIntelligenceData | null>(null);
   const { isLoaded } = useGoogleMaps();
 
   // Geocode the location when component mounts or location changes
@@ -167,7 +168,20 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
     getLocationCoordinates();
   }, [location, businessType, isLoaded, cachedData, tabId, onUpdateCache]);
 
-  // Calculate REAL success score and analytics from satellite data and competitors
+  // Gather location intelligence once we have businesses and location
+  useEffect(() => {
+    if (!actualLocation || businesses.length === 0 || isGeocoding) return;
+
+    const gatherIntel = async () => {
+      console.log('🔍 Starting location intelligence gathering...');
+      const intel = await gatherLocationIntelligence(actualLocation, businessType, businesses);
+      setLocationIntel(intel);
+    };
+
+    gatherIntel();
+  }, [actualLocation, businesses, businessType, isGeocoding]);
+
+  // Calculate success score and analytics from competitors + intelligence data
   const successScore = calculateSuccessScore({
     satelliteData,
     ndviData,
@@ -190,13 +204,17 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
     ndviData,
   });
 
+  // Build analysis object from REAL data (no more mockAnalysis spread)
   const analysis: LocationAnalysisType = {
-    ...mockAnalysis,
-    location: actualLocation || { ...mockAnalysis.location, address: location },
+    location: actualLocation || { lat: 0, lng: 0, address: location },
     businessType,
-    successScore, // REAL score based on satellite + competitors
-    seasonalDemand, // REAL seasonal data
-    kpis, // REAL KPIs
+    successScore,
+    seasonalDemand,
+    kpis,
+    demographics: locationIntel?.demographics || { office: 50, residents: 50 },
+    competitors: locationIntel?.competitors || [],
+    locationProfile: locationIntel?.locationProfile || { age: 50, income: 50, familySize: 50, daytimePop: 50, accessibility: 50 },
+    competitionDensity: locationIntel?.competitionDensity || [],
   };
 
   const handleBusinessClick = (business: Business) => {
@@ -661,8 +679,8 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                 <button
                   onClick={() => setActiveTab('overview')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'overview'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
                   Overview
@@ -670,8 +688,8 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                 <button
                   onClick={() => setActiveTab('businesses')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'businesses'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
                   Businesses
@@ -679,8 +697,8 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                 <button
                   onClick={() => setActiveTab('rent')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'rent'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
                   Rent
@@ -688,8 +706,8 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                 <button
                   onClick={() => setActiveTab('ai-insight')}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === 'ai-insight'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                 >
                   AI Chat
