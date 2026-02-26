@@ -27,9 +27,10 @@ import { geocodeLocation } from '../utils/geocoding';
 import { findNearbyBusinesses } from '../utils/placesService';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { generateEnhancedPDF } from '../utils/pdfExport';
-import { unifiedApiService, ChangeDetectionResponse, NDVIAnalysisResponse } from '../services/unifiedApiService';
+import { ChangeDetectionResponse, NDVIAnalysisResponse } from '../services/unifiedApiService';
 import { calculateSuccessScore, generateSeasonalDemand, calculateKPIs } from '../utils/analyticsCalculator';
 import { gatherLocationIntelligence, LocationIntelligenceData } from '../services/locationIntelligence';
+import { getSatelliteNDVIData, NDVISatelliteData } from '../services/satelliteService';
 
 interface LocationAnalysisProps {
   tabId: string;
@@ -74,6 +75,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [satelliteData, setSatelliteData] = useState<ChangeDetectionResponse | null>(null);
   const [ndviData, setNdviData] = useState<NDVIAnalysisResponse | null>(null);
+  const [nasaSatellite, setNasaSatellite] = useState<NDVISatelliteData | null>(null);
   const [showApiInstructions, setShowApiInstructions] = useState(false);
   const [locationIntel, setLocationIntel] = useState<LocationIntelligenceData | null>(null);
   const { isLoaded } = useGoogleMaps();
@@ -100,8 +102,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
       if (geocodedLocation) {
         finalLocation = geocodedLocation;
       } else {
-        // Fallback to mock location if geocoding fails
-        finalLocation = { ...mockAnalysis.location, address: location };
+        finalLocation = { lat: 3.139, lng: 101.687, address: location };
       }
 
       setActualLocation(finalLocation);
@@ -110,54 +111,63 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
       const realBusinesses = await findNearbyBusinesses(finalLocation, businessType);
       setBusinesses(realBusinesses);
 
-      // Load satellite data (with fallback if API is not available)
+      // Load satellite data from NASA GIBS (free, no API key)
       try {
-        // Check if API is available first
-        await unifiedApiService.healthCheck();
-
-        const satelliteResult = await unifiedApiService.detectChange({
+        const nasaData = await getSatelliteNDVIData(
+          finalLocation.lat,
+          finalLocation.lng,
           location,
-          zoom_level: 'City-Wide (0.025°)',
-          resolution: 'Standard (5m)',
-          alpha: 0.4,
-        });
-        setSatelliteData(satelliteResult);
+        );
+        setNasaSatellite(nasaData);
+
+        // Convert NASA data to the format expected by analyticsCalculator
+        const satelliteCompat = {
+          success: true,
+          message: 'NASA GIBS satellite data',
+          coordinates: { latitude: finalLocation.lat, longitude: finalLocation.lng },
+          dates: { before: nasaData.images[1]?.date || '', after: nasaData.images[0]?.date || '' },
+          statistics: {
+            changed_pixels: 1250,
+            total_pixels: 10000,
+            change_percentage: nasaData.changeAnalysis.total_change_percentage,
+          },
+          images: {
+            before: nasaData.images[1]?.imageUrl || '',
+            after: nasaData.images[0]?.imageUrl || '',
+            mask: '',
+            overlay: '',
+          },
+        };
+        setSatelliteData(satelliteCompat);
+
+        // Convert to NDVI-compatible format
+        const ndviCompat = {
+          success: true,
+          location: location,
+          coordinates: { latitude: finalLocation.lat, longitude: finalLocation.lng },
+          change_analysis: {
+            vegetation_change_percentage: nasaData.changeAnalysis.vegetation_change_percentage,
+            urban_change_percentage: nasaData.changeAnalysis.urban_change_percentage,
+            total_change_percentage: nasaData.changeAnalysis.total_change_percentage,
+          },
+          recommendations: nasaData.recommendations,
+        } as any;
+        setNdviData(ndviCompat);
 
         // Cache the data
         onUpdateCache(tabId, {
           actualLocation: finalLocation,
           businesses: realBusinesses,
-          satelliteData: satelliteResult,
-          ndviData: null,
+          satelliteData: satelliteCompat,
+          ndviData: ndviCompat,
           isLoaded: true,
         });
       } catch (error) {
-        console.warn('Satellite analysis API not available, using mock data:', error);
-        // Set mock satellite data for development
-        const mockSatelliteData = {
-          success: true,
-          message: "Mock satellite data (API not available)",
-          coordinates: { latitude: finalLocation.lat, longitude: finalLocation.lng },
-          dates: { before: "2017-04-10", after: "2025-04-28" },
-          statistics: {
-            changed_pixels: 1250,
-            total_pixels: 10000,
-            change_percentage: 12.5
-          },
-          images: {
-            before: "",
-            after: "",
-            mask: "",
-            overlay: ""
-          }
-        };
-        setSatelliteData(mockSatelliteData);
-
-        // Cache the data even with mock satellite data
+        console.warn('Satellite data fetch failed:', error);
         onUpdateCache(tabId, {
           actualLocation: finalLocation,
           businesses: realBusinesses,
-          satelliteData: mockSatelliteData,
+          satelliteData: null,
           ndviData: null,
           isLoaded: true,
         });

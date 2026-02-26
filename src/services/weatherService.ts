@@ -89,42 +89,60 @@ function isRainy(forecast: string): boolean {
 }
 
 /**
- * Extract a searchable location name from an address
- * e.g., "Near LRT KLCC, Kuala Lumpur, Malaysia" → "Kuala Lumpur"
+ * Extract a searchable location name from an address for the weather API.
+ * Works for ALL of Malaysia — tries multiple strategies to find a match.
  */
 function extractLocationName(address: string): string {
-    // Common Malaysian city/district names to search for
-    const knownLocations = [
-        'Kuala Lumpur', 'Petaling Jaya', 'Shah Alam', 'Subang Jaya',
-        'Cyberjaya', 'Putrajaya', 'Johor Bahru', 'George Town', 'Penang',
-        'Ipoh', 'Melaka', 'Kota Kinabalu', 'Kuching', 'Seremban',
-        'Klang', 'Kajang', 'Ampang', 'Cheras', 'Kepong', 'Damansara',
-        'Bangsar', 'Mont Kiara', 'KLCC', 'Bukit Bintang',
-        'Langkawi', 'Cameron Highlands', 'Genting Highlands',
-        'Kuantan', 'Kota Bharu', 'Kuala Terengganu', 'Alor Setar',
-    ];
+    const lower = address.toLowerCase();
 
-    for (const loc of knownLocations) {
-        if (address.toLowerCase().includes(loc.toLowerCase())) {
-            // Map sub-areas to their parent district for the weather API
-            if (['KLCC', 'Bukit Bintang', 'Bangsar', 'Mont Kiara', 'Cheras', 'Kepong', 'Ampang'].includes(loc)) {
-                return 'Kuala Lumpur';
-            }
-            if (['Damansara', 'Subang Jaya'].includes(loc)) {
-                return 'Petaling Jaya';
-            }
-            return loc;
-        }
+    // Sub-area → parent district mapping (covers all Malaysia)
+    const SUB_AREA_MAP: Record<string, string> = {
+        // KL sub-areas
+        'klcc': 'Kuala Lumpur', 'bukit bintang': 'Kuala Lumpur', 'bangsar': 'Kuala Lumpur',
+        'mont kiara': 'Kuala Lumpur', 'cheras': 'Kuala Lumpur', 'kepong': 'Kuala Lumpur',
+        'ampang': 'Kuala Lumpur', 'sentul': 'Kuala Lumpur', 'wangsa maju': 'Kuala Lumpur',
+        'setapak': 'Kuala Lumpur', 'titiwangsa': 'Kuala Lumpur', 'segambut': 'Kuala Lumpur',
+        'sri petaling': 'Kuala Lumpur', 'bukit jalil': 'Kuala Lumpur',
+        // Selangor sub-areas
+        'damansara': 'Petaling Jaya', 'subang jaya': 'Petaling Jaya', 'ss2': 'Petaling Jaya',
+        'usj': 'Subang Jaya', 'puchong': 'Petaling', 'seri kembangan': 'Serdang',
+        'bangi': 'Kajang', 'semenyih': 'Kajang', 'rawang': 'Gombak',
+        'setia alam': 'Shah Alam', 'kota kemuning': 'Shah Alam',
+        // Penang sub-areas
+        'bayan lepas': 'Pulau Pinang', 'gurney': 'Pulau Pinang', 'tanjung bungah': 'Pulau Pinang',
+        'jelutong': 'Pulau Pinang', 'gelugor': 'Pulau Pinang', 'butterworth': 'Seberang Perai',
+        // Johor sub-areas
+        'iskandar puteri': 'Johor Bahru', 'nusajaya': 'Johor Bahru', 'pasir gudang': 'Johor Bahru',
+        'senai': 'Kulai', 'pontian': 'Pontian', 'segamat': 'Segamat', 'kluang': 'Kluang',
+        'batu pahat': 'Batu Pahat', 'muar': 'Muar',
+        // Sabah / Sarawak sub-areas
+        'gaya street': 'Kota Kinabalu', 'likas': 'Kota Kinabalu', 'penampang': 'Kota Kinabalu',
+        'sandakan': 'Sandakan', 'tawau': 'Tawau', 'lahad datu': 'Lahad Datu',
+        'sibu': 'Sibu', 'miri': 'Miri', 'bintulu': 'Bintulu', 'sri aman': 'Sri Aman',
+    };
+
+    // Check sub-area map first
+    for (const [sub, parent] of Object.entries(SUB_AREA_MAP)) {
+        if (lower.includes(sub)) return parent;
     }
 
-    // Fallback: try to extract city from comma-separated address
-    const parts = address.split(',').map(p => p.trim());
-    if (parts.length >= 2) {
-        // Usually the second-to-last part is the city
-        return parts[parts.length - 2] || parts[0];
+    // Try to extract from comma-separated address parts
+    // Google geocoder returns: "street, area, city, state, country"
+    const parts = address.split(',').map(p => p.trim()).filter(Boolean);
+
+    // Remove "Malaysia" and state abbreviations from the end
+    const filtered = parts.filter(p =>
+        !p.toLowerCase().includes('malaysia') &&
+        p.length > 2
+    );
+
+    // Try each part from second-to-last (usually city/district) working backwards
+    if (filtered.length >= 2) {
+        // Return the second-to-last part (usually the city/state)
+        return filtered[filtered.length - 1] || filtered[filtered.length - 2] || filtered[0];
     }
 
-    return parts[0] || 'Kuala Lumpur';
+    return filtered[0] || parts[0] || address;
 }
 
 /**
