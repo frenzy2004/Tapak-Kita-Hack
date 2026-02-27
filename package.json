@@ -12,6 +12,7 @@
     "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "dependencies": {
+    "@google/earthengine": "^1.7.14",
     "@googlemaps/js-api-loader": "^1.16.10",
     "@gsap/react": "^2.1.2",
     "@radix-ui/react-avatar": "^1.1.10",

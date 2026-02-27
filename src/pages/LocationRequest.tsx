@@ -120,7 +120,7 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white/40 backdrop-blur-xl p-4 sm:p-6 rounded-[40px] shadow-clayCard border border-white/60">
 
               {/* Location Input Group */}
-              <div className="lg:col-span-5 relative group">
+              <div className="lg:col-span-5 relative group z-20">
                 <label className="sr-only" htmlFor="location">Location</label>
                 <div className="relative">
                   <Input
@@ -142,7 +142,10 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
                       <button
                         key={suggestion.place_id}
                         type="button"
-                        onClick={() => handleSuggestionClick(suggestion)}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSuggestionClick(suggestion);
+                        }}
                         className="w-full text-left px-6 py-4 hover:bg-primary/5 hover:text-primary transition-colors rounded-2xl flex items-start gap-3 group/item"
                       >
                         <MapPin className="w-5 h-5 text-gray-400 group-hover/item:text-primary mt-1 flex-shrink-0 transition-colors" />

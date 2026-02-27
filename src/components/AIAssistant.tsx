@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot } from 'lucide-react';
+import { Send, Bot, Globe, Search, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../types';
+import { firecrawlService } from '../services/firecrawlService';
+
 
 interface AIAssistantProps {
   onClose?: () => void;
@@ -26,7 +28,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ analysisContext }) => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
+  const [searchStatus, setSearchStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,12 +41,35 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ analysisContext }) => {
     scrollToBottom();
   }, [messages]);
 
-  // Call OpenAI API directly
+  // Call Gemini API directly
   const fetchAIResponse = async (userMessage: string): Promise<string> => {
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      let webContext = '';
+
+      if (isWebSearchEnabled) {
+        setSearchStatus('Searching the web...');
+        try {
+          const searchQuery = `${analysisContext?.businessType || ''} market trends near ${analysisContext?.location || ''} ${userMessage}`;
+          const mapRes = await firecrawlService.mapSearch(searchQuery, 2);
+
+          if (mapRes.success && mapRes.links.length > 0) {
+            setSearchStatus('Scraping top results...');
+            const scrapeRes = await firecrawlService.scrapeUrl(mapRes.links[0]);
+            if (scrapeRes.success) {
+              webContext = `\n\nWEB RESEARCH DATA FOUND:\n${scrapeRes.data.markdown.slice(0, 3000)}`;
+              setSearchStatus('Analyzing findings...');
+            }
+          }
+        } catch (searchErr) {
+          console.error('Web search failed:', searchErr);
+          setSearchStatus('Search failed, continuing with local data...');
+        }
+      }
+
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
       if (!apiKey) {
-        return 'OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your .env file.';
+        return 'Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.';
       }
 
       // Build context string from analysis data
@@ -69,22 +97,13 @@ TOP COMPETITORS:
 ${analysisContext.businesses?.slice(0, 5).map(b => `- ${b.name} (${b.rating}★, ${b.distance}km away)`).join('\n') || 'No competitor data available'}
 ` : 'No analysis data available yet.';
 
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: `You are a confident, data-driven location analysis AI for Tapak. ALWAYS base your answers on the ACTUAL analysis data provided below. Be direct and specific - cite exact numbers, percentages, and findings from the data.
+      const systemPrompt = `You are a confident, data-driven location analysis AI for Tapak. ALWAYS base your answers on the ACTUAL analysis data provided below. Be direct and specific - cite exact numbers, percentages, and findings from the data.
 
 ${contextData}
+${webContext}
 
 FORMATTING RULES (CRITICAL):
+
 1. Start with a relevant emoji that matches the topic (🌿 for vegetation, 🏙️ for urban, 💰 for business, 🌡️ for air quality, etc.)
 2. Use a clear title/header line with **bold**
 3. Add TWO line breaks between main sections for proper spacing
@@ -154,17 +173,32 @@ COMPREHENSIVE SUMMARY FORMAT (when asked for full analysis/summary):
 
 *Switch between tabs to explore the different visualizations and insights.*
 
-Be confident, use real data, cite exact numbers, and ALWAYS follow these visual formats.`,
+Be confident, use real data, cite exact numbers, and ALWAYS follow these visual formats.`;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemPrompt }],
             },
-            {
-              role: 'user',
-              content: userMessage,
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: userMessage }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 2048,
             },
-          ],
-          temperature: 0.7,
-          max_tokens: 500,
-        }),
-      });
+          }),
+        }
+      );
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({ error: { message: 'Unknown error' } }));
@@ -172,10 +206,12 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
       }
 
       const data = await res.json();
-      return data.choices?.[0]?.message?.content || 'Sorry, I could not get a response from the AI.';
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response from the AI.';
     } catch (err) {
-      console.error('OpenAI API Error:', err);
+      console.error('Gemini API Error:', err);
       return `Error contacting AI service: ${err instanceof Error ? err.message : 'Unknown error'}`;
+    } finally {
+      setSearchStatus(null);
     }
   };
 
@@ -193,7 +229,7 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
     setInputValue('');
     setIsTyping(true);
 
-    // Call OpenAI API
+    // Call Gemini API
     const aiText = await fetchAIResponse(text);
     const aiResponse: ChatMessage = {
       id: (Date.now() + 1).toString(),
@@ -209,12 +245,26 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
     <div className="flex flex-col h-full bg-white">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto relative p-4 space-y-6">
-        <div className="pb-4 border-b border-border">
-          <h2 className="text-lg font-heading font-bold text-foreground">Tapak AI</h2>
-          <p className="text-sm max-w-sm text-foreground-muted font-body">
-            Ask questions about your location analysis results
-          </p>
+        <div className="pb-4 border-b border-border flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-heading font-bold text-foreground">Tapak AI</h2>
+            <p className="text-sm max-w-sm text-foreground-muted font-body">
+              Ask questions about your location analysis results
+            </p>
+          </div>
+          <button
+            onClick={() => setIsWebSearchEnabled(!isWebSearchEnabled)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${isWebSearchEnabled
+              ? 'bg-primary text-white shadow-clayButton active:shadow-clayPressed'
+              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+            title={isWebSearchEnabled ? 'Web search enabled' : 'Enable web search'}
+          >
+            {isWebSearchEnabled ? <Globe className="w-3.5 h-3.5 animate-pulse" /> : <Search className="w-3.5 h-3.5" />}
+            {isWebSearchEnabled ? 'Web Search ON' : 'Web Search OFF'}
+          </button>
         </div>
+
         {messages.map((message) => (
           <div
             key={message.id}
@@ -223,8 +273,8 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
           >
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 shadow-sm ${message.isUser
-                  ? 'bg-white text-primary border border-primary/20'
-                  : 'bg-gradient-to-br from-primary to-secondary text-white'
+                ? 'bg-white text-primary border border-primary/20'
+                : 'bg-gradient-to-br from-primary to-secondary text-white'
                 }`}
             >
               {message.isUser ? 'U' : 'AI'}
@@ -234,8 +284,8 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
             >
               <div
                 className={`rounded-2xl p-4 shadow-sm break-words ${message.isUser
-                    ? 'bg-primary text-white rounded-tr-sm'
-                    : 'bg-[#F5F5F4] text-[#1C1917] rounded-tl-sm'
+                  ? 'bg-primary text-white rounded-tr-sm'
+                  : 'bg-[#F5F5F4] text-[#1C1917] rounded-tl-sm'
                   }`}
               >
                 <div
@@ -265,15 +315,24 @@ Be confident, use real data, cite exact numbers, and ALWAYS follow these visual 
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-[#F5F5F4] px-4 py-3 rounded-2xl rounded-tl-sm">
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-                <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            <div className="flex flex-col gap-2">
+              <div className="bg-[#F5F5F4] px-4 py-3 rounded-2xl rounded-tl-sm">
+                <div className="flex gap-1.5">
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                </div>
               </div>
+              {searchStatus && (
+                <div className="flex items-center gap-2 text-[10px] text-primary font-bold animate-pulse px-2">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {searchStatus}
+                </div>
+              )}
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
