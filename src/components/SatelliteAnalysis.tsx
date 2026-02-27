@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, RefreshCw, TrendingUp } from 'lucide-react';
 import { unifiedApiService, ChangeDetectionResponse, NDVIAnalysisResponse } from '../services/unifiedApiService';
+import { fetchSatelliteImage } from '../services/sentinelService';
 import { Location } from '../types';
 
 interface SatelliteAnalysisProps {
@@ -26,8 +27,9 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
   const [ndviData, setNdviData] = useState<NDVIAnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('siamese_unet');
-  const [imageLoadErrors, setImageLoadErrors] = useState<{[key: string]: boolean}>({});
-  const [imageLoading, setImageLoading] = useState<{[key: string]: boolean}>({});
+  const [imageLoadErrors, setImageLoadErrors] = useState<{ [key: string]: boolean }>({});
+  const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>({});
+  const [realImageUrl, setRealImageUrl] = useState<string | null>(null);
 
   // Available models
   const models = [
@@ -47,7 +49,7 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
     try {
       // Check if API is available first
       await unifiedApiService.healthCheck();
-      
+
       const result = await unifiedApiService.detectChange({
         location,
         zoom_level: 'City-Wide (0.025°)',
@@ -57,7 +59,7 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
 
       setChangeDetectionData(result);
       onAnalysisComplete?.(result);
-      
+
       // Debug: Log the received data
       console.log('Change detection result:', result);
       console.log('Images received:', {
@@ -93,7 +95,7 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
           tensorflow_available: false
         }
       };
-      
+
       setChangeDetectionData(mockData);
       onAnalysisComplete?.(mockData);
     } finally {
@@ -140,7 +142,22 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
     if (location) {
       performChangeDetection();
     }
-  }, [location, selectedModel, initialData]);
+
+    // Attempt to fetch real satellite image
+    if (coordinates) {
+      const offset = 0.05;
+      fetchSatelliteImage(
+        coordinates.lng - offset,
+        coordinates.lat - offset,
+        coordinates.lng + offset,
+        coordinates.lat + offset
+      ).then(url => {
+        setRealImageUrl(url);
+      }).catch(err => {
+        console.error("Could not fetch real satellite image:", err);
+      });
+    }
+  }, [location, selectedModel, initialData, coordinates]);
 
   const renderImagePlaceholder = (type: 'before' | 'after' | 'changes', data?: any) => {
     const isBefore = type === 'before';
@@ -149,9 +166,14 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
 
     // Get the appropriate image data
     const imageData = data?.images;
-    const imageSrc = isBefore ? imageData?.before : 
-                    isAfter ? imageData?.after : 
-                    isChanges ? imageData?.overlay : null;
+    let imageSrc = isBefore ? imageData?.before :
+      isAfter ? imageData?.after :
+        isChanges ? imageData?.overlay : null;
+
+    // Only inject real Sentinel Hub image for "after" view if available and we're missing mock data
+    if (isAfter && realImageUrl) {
+      imageSrc = realImageUrl;
+    }
 
     return (
       <div className="relative rounded-lg overflow-hidden bg-background-elevated border border-border group">
@@ -161,18 +183,18 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
           </span>
           <span className="text-xs text-muted-foreground ml-2">
             {isBefore ? data?.dates?.before || '2017-04-10' :
-             isAfter ? data?.dates?.after || '2025-04-28' :
-             '2017-04-10 to 2025-04-28'}
+              isAfter ? data?.dates?.after || '2025-04-28' :
+                '2017-04-10 to 2025-04-28'}
           </span>
         </div>
-        
+
         {imageSrc && !imageLoadErrors[type] ? (
           // Display actual satellite image
           <div className="w-full h-full min-h-[400px] flex items-center justify-center relative">
-            <img 
-              src={`data:image/png;base64,${imageSrc}`}
+            <img
+              src={imageSrc.startsWith('blob:') ? imageSrc : `data:image/png;base64,${imageSrc}`}
               alt={`${isBefore ? 'Before' : isAfter ? 'After' : 'Changes'} satellite image`}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
               onLoadStart={() => {
                 setImageLoading(prev => ({ ...prev, [type]: true }));
               }}
@@ -196,30 +218,28 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
           </div>
         ) : (
           // Show placeholder when no image data
-          <div className={`w-full h-full flex items-center justify-center min-h-[400px] ${
-            isBefore ? 'bg-gradient-to-br from-orange-900/20 to-orange-700/20' :
-            isAfter ? 'bg-gradient-to-br from-green-900/20 to-yellow-700/20' :
-            'bg-gradient-to-br from-purple-900/20 to-pink-700/20'
-          }`}>
+          <div className={`w-full h-full flex items-center justify-center min-h-[400px] ${isBefore ? 'bg-gradient-to-br from-orange-900/20 to-orange-700/20' :
+              isAfter ? 'bg-gradient-to-br from-green-900/20 to-yellow-700/20' :
+                'bg-gradient-to-br from-purple-900/20 to-pink-700/20'
+            }`}>
             <div className="text-center p-8">
-              <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${
-                isBefore ? 'bg-orange-500/20' :
-                isAfter ? 'bg-green-500/20' :
-                'bg-purple-500/20'
-              } flex items-center justify-center`}>
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${isBefore ? 'bg-orange-500/20' :
+                  isAfter ? 'bg-green-500/20' :
+                    'bg-purple-500/20'
+                } flex items-center justify-center`}>
                 <span className="text-3xl">
                   {isBefore ? '🛰️' : isAfter ? '🌆' : '📊'}
                 </span>
               </div>
               <p className="text-muted-foreground text-sm">
-                {isBefore ? `Satellite imagery for ${location}` : 
-                 isAfter ? `Current satellite view of ${location}` :
-                 'Change Detection Analysis'}
+                {isBefore ? `Satellite imagery for ${location}` :
+                  isAfter ? `Current satellite view of ${location}` :
+                    'Change Detection Analysis'}
               </p>
               <p className="text-muted-foreground text-xs mt-1">
                 {isBefore ? 'Before: April 2017' :
-                 isAfter ? 'After: April 2025' :
-                 '2017-04-10 to 2025-04-28'}
+                  isAfter ? 'After: April 2025' :
+                    '2017-04-10 to 2025-04-28'}
               </p>
               {isChanges && data?.statistics && (
                 <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mt-4">
@@ -321,7 +341,7 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-bold text-foreground">Satellite Analysis</h3>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={performChangeDetection}
               disabled={isLoading}
               className="btn-icon btn-ghost"
@@ -354,7 +374,7 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
               <option value="comparison">Model Comparison</option>
             </select>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">Model:</span>
             <select
@@ -387,41 +407,37 @@ const SatelliteAnalysis: React.FC<SatelliteAnalysisProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode('before')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'before'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'before'
                 ? 'bg-background text-foreground shadow-sm border border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-            }`}
+              }`}
           >
             Before
           </button>
           <button
             onClick={() => setViewMode('after')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'after'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'after'
                 ? 'bg-background text-foreground shadow-sm border border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-            }`}
+              }`}
           >
             After
           </button>
           <button
             onClick={() => setViewMode('changes')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'changes'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'changes'
                 ? 'bg-background text-foreground shadow-sm border border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-            }`}
+              }`}
           >
             Changes
           </button>
           <button
             onClick={() => setViewMode('split')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === 'split'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'split'
                 ? 'bg-background text-foreground shadow-sm border border-border'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-            }`}
+              }`}
           >
             Split View
           </button>

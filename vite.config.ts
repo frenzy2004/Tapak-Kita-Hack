@@ -14,6 +14,16 @@ export default defineConfig({
     port: 8080,
     proxy: {
       '/api': 'http://localhost:3001', // Make sure this matches your backend port
+      '/sentinel-auth': {
+        target: 'https://services.sentinel-hub.com',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/sentinel-auth/, ''),
+      },
+      '/sentinel-api': {
+        target: 'https://services.sentinel-hub.com',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/sentinel-api/, ''),
+      },
     },
   },
   optimizeDeps: {
