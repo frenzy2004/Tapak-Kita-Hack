@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { MapPin, TrendingUp, Building, Calculator, Info, Star, Users, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { MapPin, TrendingUp, Building, Calculator, Info, Star, Users, Clock, Loader2 } from 'lucide-react';
+import { scrapeRentalData, RentalProperty } from '../services/rentalScraper';
 
 interface RentLocationContentProps {
   location: string;
@@ -11,9 +12,11 @@ const RentLocationContent: React.FC<RentLocationContentProps> = ({ location, bus
   const [spaceSize, setSpaceSize] = useState<number>(1000);
   const [rentPerSqFt, setRentPerSqFt] = useState<number>(15.5);
   const [calculatedRent, setCalculatedRent] = useState<number>(15500);
+  const [isLoadingRent, setIsLoadingRent] = useState(true);
+  const [rentSource, setRentSource] = useState<'scraped' | 'fallback'>('fallback');
 
-  // Mock rental data
-  const rentData = {
+  // Hardcoded fallback data
+  const fallbackRentData = {
     averageRent: 15.50,
     priceRange: { min: 12, max: 22 },
     currency: 'RM',
@@ -22,138 +25,69 @@ const RentLocationContent: React.FC<RentLocationContentProps> = ({ location, bus
     trendPercentage: 8.5,
   };
 
-  const properties = [
+  const fallbackProperties: RentalProperty[] = [
     {
-      id: '1',
-      name: 'Avenue K Restaurant Lot',
+      id: '1', name: 'Avenue K Restaurant Lot',
       address: 'Level G, Avenue K Mall, Jalan Ampang, Kuala Lumpur',
-      rent: 25.00,
-      size: 1100,
-      type: 'Restaurant Space',
-      availability: 'Available Now',
-      rating: 4.6,
-      amenities: ['High Foot Traffic', 'Mall Security', 'Grease Trap Installed', 'Air Conditioning'],
+      rent: 25.00, size: 1100, type: 'Restaurant Space', availability: 'Available Now',
+      rating: 4.6, amenities: ['High Foot Traffic', 'Mall Security', 'Grease Trap Installed', 'Air Conditioning'],
       contact: '+60 3-2168 7888',
       image: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
-      id: '2',
-      name: 'Suria KLCC F&B Corner Lot',
+      id: '2', name: 'Suria KLCC F&B Corner Lot',
       address: 'Lot C.12, Level Concourse, Suria KLCC',
-      rent: 28.50,
-      size: 900,
-      type: 'Restaurant Space',
-      availability: 'Available in 3 weeks',
-      rating: 4.9,
-      amenities: ['High Foot Traffic', 'Kitchen Exhaust Ready', 'Mall Security', 'Utilities Included'],
+      rent: 28.50, size: 900, type: 'Restaurant Space', availability: 'Available in 3 weeks',
+      rating: 4.9, amenities: ['High Foot Traffic', 'Kitchen Exhaust Ready', 'Mall Security', 'Utilities Included'],
       contact: '+60 3-2382 2828',
       image: 'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
     {
-      id: '3',
-      name: 'The LINC KL Dining Lot',
+      id: '3', name: 'The LINC KL Dining Lot',
       address: '360 Jalan Tun Razak, Ground Floor, Kuala Lumpur',
-      rent: 20.75,
-      size: 1000,
-      type: 'Restaurant Space',
-      availability: 'Available Now',
-      rating: 4.4,
-      amenities: ['Open Concept Layout', 'Ample Parking', 'Grease Trap Installed', 'Flexible Kitchen Setup'],
+      rent: 20.75, size: 1000, type: 'Restaurant Space', availability: 'Available Now',
+      rating: 4.4, amenities: ['Open Concept Layout', 'Ample Parking', 'Grease Trap Installed', 'Flexible Kitchen Setup'],
       contact: '+60 3-2730 1188',
       image: 'https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
-    {
-      id: '4',
-      name: 'Menara Binjai F&B Lot',
-      address: 'No. 2 Jalan Binjai, Near KLCC LRT',
-      rent: 18.90,
-      size: 1250,
-      type: 'Restaurant Space',
-      availability: 'Available in 1 month',
-      rating: 4.2,
-      amenities: ['Street Frontage', 'Exhaust Ventilation Ready', 'Nearby Offices', 'High Visibility'],
-      contact: '+60 3-2020 5055',
-      image: 'https://images.pexels.com/photos/2619967/pexels-photo-2619967.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '5',
-      name: 'Lot 10 Bukit Bintang Food Court Unit',
-      address: 'LG Floor, Lot 10 Mall, Jalan Sultan Ismail',
-      rent: 19.50,
-      size: 750,
-      type: 'Restaurant Space',
-      availability: 'Available in 2 weeks',
-      rating: 4.5,
-      amenities: ['Food Court Location', 'Ready Kitchen Setup', 'Utilities Included', 'Mall Security'],
-      contact: '+60 3-2143 0110',
-      image: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '6',
-      name: 'Jalan P. Ramlee Streetfront Cafe Lot',
-      address: 'Ground Floor, Jalan P. Ramlee, Kuala Lumpur',
-      rent: 22.00,
-      size: 1300,
-      type: 'Restaurant Space',
-      availability: 'Available Now',
-      rating: 4.3,
-      amenities: ['Street Frontage', 'Bar Setup Possible', 'High Nightlife Traffic', 'Flexible Layout'],
-      contact: '+60 3-2181 5055',
-      image: 'https://images.pexels.com/photos/256520/pexels-photo-256520.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '7',
-      name: 'Plaza Low Yat F&B Lot',
-      address: 'Ground Floor, Plaza Low Yat, Jalan Bukit Bintang',
-      rent: 17.80,
-      size: 950,
-      type: 'Restaurant Space',
-      availability: 'Available Now',
-      rating: 4.1,
-      amenities: ['Near IT Crowd', 'Air Conditioning', 'Mall Security', 'High Visibility'],
-      contact: '+60 3-2142 8611',
-      image: 'https://images.pexels.com/photos/302902/pexels-photo-302902.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '8',
-      name: 'Petronas Twin Towers Food Court Unit',
-      address: 'Tower 2, Level Concourse, Petronas Twin Towers',
-      rent: 24.50,
-      size: 850,
-      type: 'Restaurant Space',
-      availability: 'Available in 1 month',
-      rating: 4.7,
-      amenities: ['Corporate Lunch Crowd', 'Kitchen Exhaust Ready', 'Mall Security', 'Utilities Included'],
-      contact: '+60 3-2331 8080',
-      image: 'https://images.pexels.com/photos/45530/pexels-photo-45530.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '9',
-      name: 'Jalan Ampang Corner Shoplot',
-      address: 'No. 188 Jalan Ampang, Kuala Lumpur',
-      rent: 21.25,
-      size: 1400,
-      type: 'Restaurant Space',
-      availability: 'Available Now',
-      rating: 4.2,
-      amenities: ['Street Parking', 'Exhaust Ready', 'High Visibility', 'Office Crowd Nearby'],
-      contact: '+60 3-2148 0099',
-      image: 'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
-    {
-      id: '10',
-      name: 'Quill City Mall F&B Lot',
-      address: 'Ground Floor, Quill City Mall, Jalan Sultan Ismail',
-      rent: 18.20,
-      size: 1000,
-      type: 'Restaurant Space',
-      availability: 'Available in 2 weeks',
-      rating: 4.0,
-      amenities: ['Mall Crowd', 'Grease Trap Installed', 'Ample Parking', 'Utilities Included'],
-      contact: '+60 3-2603 1111',
-      image: 'https://images.pexels.com/photos/1128678/pexels-photo-1128678.jpeg?auto=compress&cs=tinysrgb&w=400',
-    },
   ];
+
+  const [rentData, setRentData] = useState(fallbackRentData);
+  const [properties, setProperties] = useState<RentalProperty[]>(fallbackProperties);
+
+  // Attempt to scrape real rental data
+  useEffect(() => {
+    const loadRentalData = async () => {
+      setIsLoadingRent(true);
+      try {
+        const scraped = await scrapeRentalData(location, businessType);
+        if (scraped && scraped.properties.length > 0) {
+          setRentData({
+            averageRent: scraped.averageRent,
+            priceRange: scraped.priceRange,
+            currency: scraped.currency,
+            unit: scraped.unit,
+            marketTrend: scraped.marketTrend,
+            trendPercentage: scraped.trendPercentage,
+          });
+          setProperties(scraped.properties);
+          setRentPerSqFt(scraped.averageRent);
+          setRentSource('scraped');
+          console.log('✅ Using real scraped rental data');
+        } else {
+          console.log('ℹ️ Using fallback rental data');
+          setRentSource('fallback');
+        }
+      } catch (error) {
+        console.warn('Scraping failed, using fallback data:', error);
+        setRentSource('fallback');
+      } finally {
+        setIsLoadingRent(false);
+      }
+    };
+
+    loadRentalData();
+  }, [location, businessType]);
 
   const calculateMonthlyRent = (rentPerSqFt: number, size: number) => {
     return (rentPerSqFt * size).toLocaleString();
@@ -177,12 +111,28 @@ const RentLocationContent: React.FC<RentLocationContentProps> = ({ location, bus
 
   return (
     <div className="space-y-6">
+      {/* Loading state */}
+      {isLoadingRent && (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="w-6 h-6 animate-spin text-primary mr-3" />
+          <span className="text-muted-foreground">Searching for rental properties near {location}...</span>
+        </div>
+      )}
+
       {/* Market Overview */}
       <div className="bg-card text-foreground rounded-xl p-6 shadow-lg border border-border">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Building className="w-6 h-6" />
-          Rental Market Overview
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold flex items-center gap-2">
+            <Building className="w-6 h-6" />
+            Rental Market Overview
+          </h3>
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${rentSource === 'scraped'
+            ? 'bg-success/20 text-success border border-success/30'
+            : 'bg-warning/20 text-warning border border-warning/30'
+            }`}>
+            {rentSource === 'scraped' ? '🔴 Live Data' : '📋 Sample Data'}
+          </span>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-muted rounded-lg p-4">
             <div className="text-2xl font-bold">
@@ -265,8 +215,8 @@ const RentLocationContent: React.FC<RentLocationContentProps> = ({ location, bus
             <div
               key={property.id}
               className={`border rounded-xl p-4 transition-all duration-200 cursor-pointer hover:shadow-md ${selectedProperty === property.id
-                  ? 'border-primary bg-primary-light'
-                  : 'border-card-border hover:border-primary/30'
+                ? 'border-primary bg-primary-light'
+                : 'border-card-border hover:border-primary/30'
                 }`}
               onClick={() => setSelectedProperty(selectedProperty === property.id ? null : property.id)}
             >
@@ -286,11 +236,11 @@ const RentLocationContent: React.FC<RentLocationContentProps> = ({ location, bus
                   <div className="flex items-center gap-1 mb-2">
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
-                         <Star
+                        <Star
                           key={i}
                           className={`w-3.5 h-3.5 ${i < Math.floor(property.rating)
-                              ? 'fill-warning text-warning'
-                              : 'text-border'
+                            ? 'fill-warning text-warning'
+                            : 'text-border'
                             }`}
                         />
                       ))}
