@@ -1,155 +1,172 @@
-# Location Analysis Web App
+# 🌍 Tapak — Location Intelligence Platform
 
-A comprehensive location analysis tool that helps businesses make informed decisions about where to establish their operations. Built with React, TypeScript, and modern web technologies.
+> **Find your perfect business spot.** Tapak is an AI-powered location intelligence platform that helps entrepreneurs and businesses make data-driven decisions about where to set up shop in Malaysia.
 
-## Features
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss)
 
-### Page 1 - Location Analysis Request
-- Clean, ChatGPT-style interface with animated wave background
-- Location input with suggestions
-- Business type selection dropdown
-- Form validation and accessibility features
-- Smooth animations and micro-interactions
+---
 
-### Page 2 - Interactive Analysis Dashboard
-- **Google Maps Integration**: Interactive maps with radius overlays and business markers
-- **Comprehensive Analytics**: Multiple chart types (line, donut, scatter, radar, bar, gauge)
-- **AI Assistant**: Intelligent chatbot with context-aware responses
-- **Business Explorer**: Detailed business cards with review trends
-- **Responsive Design**: Optimized for all device sizes
-- **PDF Export**: Download detailed analysis reports
+## ✨ Features
 
-## Tech Stack
+### 🏠 Landing Page
+- **Cinematic video background** with interactive 3D globe (powered by [COBE](https://github.com/shuding/cobe))
+- Claymorphism design system with glassmorphism form elements
+- Google Places autocomplete for location search
+- Business type & scale selection
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS
-- **Charts**: Chart.js with react-chartjs-2
-- **Maps**: Google Maps JavaScript API
-- **PDF Generation**: jsPDF with html2canvas
-- **Build Tool**: Vite
-- **Icons**: Lucide React
+### 📊 Intelligence Dashboard
+- **Bento grid layout** with clickable preview cards for each module
+- Dark-to-light gradient header with 3D globe backdrop
+- Multi-tab analysis system with cached data
 
-## Getting Started
+### 🗺️ Location Intelligence
+- **Google Maps** integration with competitor markers & radius overlays
+- Real-time geocoding & nearby business discovery via Places API
+- Interactive business cards with ratings and reviews
+
+### 📈 Market Data & Analytics
+- **Success Score** — AI-calculated predicted success percentage
+- KPI cards (traffic, demand, competition density)
+- Seasonal demand trends (line chart)
+- Demographic breakdown (donut chart)
+- Competitor analysis (scatter plot)
+- Competition density by radius (bar chart)
+
+### 🛰️ Urban Analysis
+- **Satellite change detection** — before/after imagery comparison
+- **NDVI vegetation analysis** — greenery and urban growth metrics
+- Powered by unified satellite API service
+
+### 🏘️ Rental Analysis
+- Location-based rental price scraping and comparison
+- Average rent per sq ft metrics
+
+### 🌤️ Weather Integration
+- Real-time weather data from Malaysia's data.gov.my API
+- Localized forecast display
+
+### 🤖 AI Assistant
+- Floating AI chat assistant with full analysis context
+- Context-aware responses based on current location data
+
+### 📄 PDF Export
+- Generate detailed analysis reports with charts and maps
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|---|---|
+| **Frontend** | React 18, TypeScript, Tailwind CSS |
+| **3D / Visuals** | COBE (WebGL Globe), Three.js, Framer Motion, GSAP |
+| **Maps** | Google Maps JavaScript API, Places API, Geocoding API |
+| **Charts** | Chart.js + react-chartjs-2 |
+| **UI Components** | Radix UI, Lucide Icons, shadcn/ui |
+| **PDF** | jsPDF + html2canvas |
+| **Backend Services** | Supabase, Express |
+| **Build** | Vite 7 |
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- Google Maps API Key
+- Node.js v18+
+- Google Maps API Key (with Maps JS, Places, and Geocoding APIs enabled)
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+# Clone the repo
+git clone https://github.com/frenzy2004/Tapak-Kita-Hack.git
+cd Tapak-Kita-Hack
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory:
-   ```env
-   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-   ```
+# Install dependencies
+npm install
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+# Set up environment variables
+cp .env.example .env
+# Edit .env and add your Google Maps API key:
+# VITE_GOOGLE_MAPS_API_KEY=your_key_here
+
+# Start development server
+npm run dev
+```
 
 ### Google Maps API Setup
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the following APIs:
-   - Maps JavaScript API
-   - Places API
-   - Geocoding API
-4. Create credentials (API Key)
-5. Restrict the API key to your domain for production use
-6. Add the API key to your `.env` file
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create/select a project
+3. Enable: **Maps JavaScript API**, **Places API**, **Geocoding API**
+4. Create an API key and add it to your `.env` file
 
-## Features Breakdown
+---
 
-### Charts and Visualizations
-- **Seasonal Demand**: Line chart showing demand patterns with peak/low season annotations
-- **Demographics**: Donut chart displaying office workers vs residents ratio
-- **Competitor Analysis**: Scatter plot comparing competitor size vs ratings
-- **Location Profile**: Radar chart showing key location characteristics
-- **Competition Density**: Bar chart showing competitor distribution by radius
-- **Success Score**: Gauge chart with overall location assessment
-
-### Interactive Elements
-- **Hamburger Menu**: Slides analysis panel in/out with smooth transitions
-- **AI Assistant**: Contextual chatbot with pre-written suggestions
-- **Business Cards**: Click to view detailed information and map recentering
-- **Map Interactions**: Clickable markers, radius overlays, and smooth animations
-
-### Accessibility Features
-- ARIA labels and keyboard navigation
-- Screen reader compatible
-- High contrast ratios
-- Focus indicators
-- Semantic HTML structure
-
-### Responsive Design
-- Mobile-first approach
-- Breakpoints: Mobile (<768px), Tablet (768-1024px), Desktop (>1024px)
-- Adaptive layouts and interactions
-- Touch-friendly interface elements
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/
-├── components/           # Reusable components
-
-│   ├── charts/          # Chart components
-│   ├── GoogleMap.tsx    # Map component
-│   ├── BusinessCard.tsx # Business listing card
-│   └── ...
-├── pages/               # Page components
-│   ├── LocationRequest.tsx
-│   └── LocationAnalysis.tsx
-├── hooks/               # Custom hooks
-│   └── useGoogleMaps.ts
-├── data/                # Mock data and constants
-│   └── mockData.ts
-├── types/               # TypeScript type definitions
-│   └── index.ts
-└── App.tsx              # Main application component
+├── pages/
+│   ├── LocationRequest.tsx       # Landing page (video + globe + form)
+│   └── LocationAnalysis.tsx      # Intelligence dashboard
+├── components/
+│   ├── GoogleMap.tsx              # Maps integration
+│   ├── FloatingAI.tsx             # AI assistant
+│   ├── PreviewCard.tsx            # Bento grid cards
+│   ├── SatelliteAnalysis.tsx      # Satellite change detection
+│   ├── NDVIAnalysis.tsx           # Vegetation analysis
+│   ├── RentLocationContent.tsx    # Rental analysis
+│   ├── WeatherCard.tsx            # Weather display
+│   ├── KPICards.tsx               # KPI metrics
+│   ├── BusinessCard.tsx           # Business listings
+│   ├── charts/                    # Chart components
+│   └── ui/                        # Reusable UI (globe, button, input)
+├── services/
+│   ├── unifiedApiService.ts       # Satellite API client
+│   ├── weatherService.ts          # Weather API client
+│   ├── rentalScraper.ts           # Rental data service
+│   ├── locationIntelligence.ts    # Location analysis engine
+│   └── satelliteService.ts        # Satellite data service
+├── utils/
+│   ├── analyticsCalculator.ts     # Success score & KPI calculation
+│   ├── geocoding.ts               # Address → coordinates
+│   ├── placesService.ts           # Google Places wrapper
+│   └── pdfExport.ts               # PDF report generation
+├── hooks/
+│   └── useGoogleMaps.ts           # Google Maps loader hook
+├── data/
+│   └── mockData.ts                # Fallback mock data
+├── types/
+│   └── index.ts                   # TypeScript definitions
+├── App.tsx                        # App router
+├── main.tsx                       # Entry point
+└── index.css                      # Global styles & design tokens
 ```
 
-## Available Scripts
+---
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+## 📜 Available Scripts
 
-## Performance Optimizations
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
 
-- Lazy loading of chart components
-- Optimized Google Maps rendering
-- Efficient state management
-- Minimized bundle size with tree shaking
-- Compressed assets and images
+---
 
-## Browser Compatibility
+## 🌐 Browser Support
 
-- Modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-- Mobile browsers (iOS Safari 14+, Chrome Mobile 90+)
-- Progressive enhancement for older browsers
+Chrome 90+ · Firefox 88+ · Safari 14+ · Edge 90+ · Mobile browsers
 
-## Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## 📝 License
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support and questions, please open an issue in the GitHub repository.
+MIT License — see [LICENSE](LICENSE) for details.
