@@ -16,7 +16,8 @@ import RentLocationContent from '../components/RentLocationContent';
 import SatelliteAnalysis from '../components/SatelliteAnalysis';
 import NDVIAnalysis from '../components/NDVIAnalysis';
 import ApiInstructions from '../components/ApiInstructions';
-import { ClayBackground } from '../components/ClayBackground';
+
+
 import { Globe } from '../components/ui/globe';
 import FloatingAI from '../components/FloatingAI'; // NEW
 import PreviewCard from '../components/PreviewCard'; // NEW
@@ -228,11 +229,35 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
   );
 
   return (
-    <div className="h-screen w-screen bg-transparent text-foreground font-body flex flex-col overflow-hidden relative">
-      <ClayBackground />
-      {/* Background Globe without Overlay */}
+    <div className="h-screen w-screen text-foreground font-body flex flex-col overflow-hidden relative" style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #2e1065 15%, #F4F1FA 40%)' }}>
+      {/* Background Globe - dark mode */}
       <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none">
-        <Globe className="scale-150 sm:scale-125" />
+        <Globe
+          className="opacity-30 scale-150 sm:scale-125 -translate-y-20"
+          config={{
+            width: 800,
+            height: 800,
+            onRender: () => { },
+            devicePixelRatio: 2,
+            phi: 0,
+            theta: 0.3,
+            dark: 1,
+            diffuse: 0.4,
+            mapSamples: 16000,
+            mapBrightness: 6,
+            baseColor: [0.3, 0.3, 0.6],
+            markerColor: [251 / 255, 100 / 255, 21 / 255],
+            glowColor: [0.3, 0.3, 0.8],
+            markers: [
+              { location: [14.5995, 120.9842], size: 0.03 },
+              { location: [19.076, 72.8777], size: 0.1 },
+              { location: [23.8103, 90.4125], size: 0.05 },
+              { location: [39.9042, 116.4074], size: 0.08 },
+              { location: [40.7128, -74.006], size: 0.1 },
+              { location: [34.6937, 135.5022], size: 0.05 },
+            ],
+          }}
+        />
       </div>
 
       {/* Floating AI Assistant (Always available) */}
@@ -265,25 +290,25 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
               <div className="flex items-center gap-4">
                 <button
                   onClick={onBack}
-                  className="btn-icon bg-white text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-colors border border-purple-100 shadow-sm"
+                  className="btn-icon bg-white text-purple-700 hover:bg-purple-50 transition-colors border border-white/80 shadow-md"
                   aria-label="Go back"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                  <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight flex items-center gap-3">
+                  <h1 className="text-3xl font-heading font-bold text-white tracking-tight flex items-center gap-3 drop-shadow-lg">
                     {location}
-                    <span className="text-lg font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
+                    <span className="text-lg font-medium text-white/70 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
                       {businessType}
                     </span>
                   </h1>
-                  <p className="text-sm text-muted-foreground mt-1">Tapak Intelligence Dashboard</p>
+                  <p className="text-sm text-white/60 mt-1">Tapak Intelligence Dashboard</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={onNewComparison}
-                  className="btn-secondary flex items-center gap-2"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-purple-700 font-semibold hover:bg-purple-50 transition-colors border border-white/80 shadow-md text-sm"
                 >
                   <GitCompare className="w-4 h-4" />
                   Compare
@@ -291,7 +316,7 @@ const LocationAnalysis: React.FC<LocationAnalysisProps> = ({
                 <button
                   onClick={downloadPDF}
                   disabled={isDownloading}
-                  className="btn-primary flex items-center gap-2"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors shadow-md text-sm"
                 >
                   <Download className="w-4 h-4" />
                   {isDownloading ? 'Exporting...' : 'Export Report'}

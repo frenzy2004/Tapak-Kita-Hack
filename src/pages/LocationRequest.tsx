@@ -5,7 +5,8 @@ import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Globe } from '../components/ui/globe';
-import { ClayBackground } from '../components/ClayBackground';
+
+
 
 interface LocationRequestProps {
   onSubmit: (location: string, businessType: string) => void;
@@ -88,12 +89,56 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-8 py-16 relative overflow-hidden bg-background">
-      <ClayBackground />
+      {/* Fullscreen Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/video.webm" type="video/webm" />
+      </video>
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/40 z-[1]" />
+      {/* Radial vignette to draw focus to center */}
+      <div className="absolute inset-0 z-[1]" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%)' }} />
 
-      {/* Interactive Globe Background */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none">
-        <Globe className="opacity-40 scale-150 sm:scale-125 translate-y-32" />
+      {/* Interactive Globe Background - dark mode to blend with video */}
+      <div className="absolute inset-0 z-[2] flex items-center justify-center overflow-hidden pointer-events-none">
+        <Globe
+          className="opacity-50 scale-150 sm:scale-125 translate-y-32"
+          config={{
+            width: 800,
+            height: 800,
+            onRender: () => { },
+            devicePixelRatio: 2,
+            phi: 0,
+            theta: 0.3,
+            dark: 1,
+            diffuse: 0.4,
+            mapSamples: 16000,
+            mapBrightness: 6,
+            baseColor: [0.3, 0.3, 0.6],
+            markerColor: [251 / 255, 100 / 255, 21 / 255],
+            glowColor: [0.3, 0.3, 0.8],
+            markers: [
+              { location: [14.5995, 120.9842], size: 0.03 },
+              { location: [19.076, 72.8777], size: 0.1 },
+              { location: [23.8103, 90.4125], size: 0.05 },
+              { location: [30.0444, 31.2357], size: 0.07 },
+              { location: [39.9042, 116.4074], size: 0.08 },
+              { location: [-23.5505, -46.6333], size: 0.1 },
+              { location: [19.4326, -99.1332], size: 0.1 },
+              { location: [40.7128, -74.006], size: 0.1 },
+              { location: [34.6937, 135.5022], size: 0.05 },
+              { location: [41.0082, 28.9784], size: 0.06 },
+            ],
+          }}
+        />
       </div>
+
+
 
       <div className="w-full max-w-7xl animate-fade-in relative z-10 flex flex-col items-center">
         {/* Brand Header */}
@@ -105,11 +150,11 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
                 <MapPin className="w-10 h-10 text-white drop-shadow-md" fill="currentColor" />
               </div>
             </div>
-            <h1 className="text-7xl sm:text-8xl md:text-9xl font-heading font-black text-clay-foreground tracking-tighter leading-[0.9]">
-              <span className="clay-text-gradient">Tapak</span>
+            <h1 className="text-7xl sm:text-8xl md:text-9xl font-heading font-black tracking-tighter leading-[0.9]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-white via-purple-300 to-pink-400">Tapak</span>
             </h1>
           </div>
-          <p className="text-xl sm:text-2xl md:text-3xl text-clay-muted font-bold font-heading max-w-2xl mx-auto">
+          <p className="text-xl sm:text-2xl md:text-3xl text-white/80 font-bold font-heading max-w-2xl mx-auto drop-shadow-lg">
             Let's find your perfect spot.
           </p>
         </div>
@@ -117,7 +162,7 @@ const LocationRequest: React.FC<LocationRequestProps> = ({ onSubmit }) => {
         {/* Horizontal Form Container */}
         <div className="w-full max-w-6xl">
           <form onSubmit={handleSubmit} className="w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white/40 backdrop-blur-xl p-4 sm:p-6 rounded-[40px] shadow-clayCard border border-white/60">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white/80 backdrop-blur-xl p-4 sm:p-6 rounded-[40px] shadow-clayCard border border-white/60">
 
               {/* Location Input Group */}
               <div className="lg:col-span-5 relative group">
